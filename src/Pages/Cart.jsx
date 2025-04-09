@@ -1,5 +1,7 @@
 import React from "react";
 import { useCart } from "../Context/CartContext";
+import { Link } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa";
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -7,7 +9,21 @@ const Cart = () => {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (cart.length === 0) {
-    return <h2 className="text-center mt-20 text-xl text-gray-600">Your cart is empty.</h2>;
+    return (
+      <div className="flex flex-col items-center justify-center mt-24 text-center px-4">
+        <FaShoppingCart className="text-6xl text-gray-400 mb-4" />
+        <h2 className="text-xl text-gray-600 mb-2">Your cart is empty.</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Looks like you haven’t added anything to your cart yet.
+        </p>
+        <Link
+          to="/menu"
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition shadow"
+        >
+          Explore Menu 🍽️
+        </Link>
+      </div>
+    );
   }
 
   return (

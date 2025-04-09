@@ -7,27 +7,23 @@ export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [cart, setCart] = useState([]);
 
-  // Load cart for current user when user logs in
   useEffect(() => {
     if (user?.id) {
-      const allCarts = JSON.parse(localStorage.getItem("smartbite_cart_data")) || {};
-      const currentUserCart = allCarts[user.id] || [];
-      setCart(currentUserCart);
+      const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
+      setCart(userCart[user.id] || []);
     } else {
-      setCart([]); // Clear cart if user logs out or not found
+      setCart([]);
     }
   }, [user]);
 
-  // Save updated cart back to localStorage
   useEffect(() => {
     if (user?.id) {
-      const allCarts = JSON.parse(localStorage.getItem("smartbite_cart_data")) || {};
-      allCarts[user.id] = cart;
-      localStorage.setItem("smartbite_cart_data", JSON.stringify(allCarts));
+      const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
+      userCart[user.id] = cart;
+      localStorage.setItem("user_cart", JSON.stringify(userCart));
     }
   }, [cart, user]);
 
-  // Add dish to cart
   const addToCart = (dish) => {
     setCart((prev) => {
       const exists = prev.find((item) => item.id === dish.id);
@@ -41,12 +37,10 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Remove dish from cart
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Update quantity of item
   const updateQuantity = (id, qty) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -55,13 +49,12 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // Clear cart for current user
   const clearCart = () => {
     setCart([]);
     if (user?.id) {
-      const allCarts = JSON.parse(localStorage.getItem("smartbite_cart_data")) || {};
-      allCarts[user.id] = [];
-      localStorage.setItem("smartbite_cart_data", JSON.stringify(allCarts));
+      const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
+      userCart[user.id] = [];
+      localStorage.setItem("user_cart", JSON.stringify(userCart));
     }
   };
 

@@ -1,56 +1,35 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("smartbite_user"))
+    JSON.parse(localStorage.getItem("current_user"))
   );
 
   const login = (email, password) => {
-    const users = JSON.parse(localStorage.getItem("smartbite_users")) || [];
-    const existing = users.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (existing) {
-      setUser(existing);
-      localStorage.setItem("smartbite_user", JSON.stringify(existing));
+    const stored = JSON.parse(localStorage.getItem("current_user"));
+    if (stored && stored.email === email && stored.password === password) {
+      setUser(stored);
       return { success: true };
     }
     return { success: false, message: "Invalid email or password" };
   };
 
   const signup = (newUser) => {
-    const users = JSON.parse(localStorage.getItem("smartbite_users")) || [];
-
-    const exists = users.find((u) => u.email === newUser.email);
-    if (exists) {
-      return { success: false, message: "User with this email already exists" };
-    }
-
-    // 🔢 Get last used ID or start from 1
-    let lastId = parseInt(localStorage.getItem("smartbite_user_id_counter")) || 0;
-    const nextId = lastId + 1;
-
-    // 🆔 Assign user ID
     const userWithId = {
       ...newUser,
-      id: nextId,
+      id: Date.now(), // or use crypto.randomUUID() if preferred
     };
-
-    // Update storage
-    users.push(userWithId);
-    localStorage.setItem("smartbite_users", JSON.stringify(users));
-    localStorage.setItem("smartbite_user", JSON.stringify(userWithId));
-    localStorage.setItem("smartbite_user_id_counter", nextId.toString());
-
+    localStorage.setItem("current_user", JSON.stringify(userWithId));
     setUser(userWithId);
     return { success: true };
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("smartbite_user");
+    localStorage.removeItem("current_user");
+    localStorage.removeItem("user_cart");
   };
 
   return (

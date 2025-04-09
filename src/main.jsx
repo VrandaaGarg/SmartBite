@@ -18,6 +18,9 @@ import Payment from "./Pages/Payment";
 import OrderSuccess from "./Pages/OrderSuccess";
 import CustomerService from "./Pages/CustomerService";
 import { OrderProvider } from "./Context/OrderContext";
+import OrderHistory from "./Pages/OrderHistory";
+
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -54,6 +57,7 @@ root.render(
                   {/* 🆕 Payment Flow */}
                   <Route path="/payment" element={<Payment />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
+                  <Route path="/orders" element={<OrderHistory />} />
                 </Route>
               </Routes>
             </OrderProvider>

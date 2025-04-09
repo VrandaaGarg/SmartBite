@@ -2,10 +2,12 @@ import React from "react";
 import { useCart } from "../Context/CartContext";
 import { Link } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
-
+  const navigate = useNavigate();
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (cart.length === 0) {
@@ -71,6 +73,15 @@ const Cart = () => {
           Clear Cart
         </button>
       </div>
+
+      {cart.length > 0 && (
+  <button
+    onClick={() => navigate("/payment")}
+    className="mt-6 w-full bg-red-600 text-white py-3 rounded hover:bg-red-700 transition"
+  >
+    Proceed to Payment
+  </button>
+)}
     </div>
   );
 };

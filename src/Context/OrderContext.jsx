@@ -10,7 +10,7 @@ export const OrderProvider = ({ children }) => {
 
   const [orders, setOrders] = useState([]);
 
-  // Load current user's orders from localStorage
+  // 🧠 Load orders for the current user
   useEffect(() => {
     if (user?.id) {
       const allOrders = JSON.parse(localStorage.getItem("orders")) || {};
@@ -20,32 +20,34 @@ export const OrderProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Save updated orders to localStorage
+  // 📝 Save updated orders for this user
   const saveOrders = (newOrders) => {
     if (!user?.id) return;
+
     const allOrders = JSON.parse(localStorage.getItem("orders")) || {};
     allOrders[user.id] = newOrders;
     localStorage.setItem("orders", JSON.stringify(allOrders));
     setOrders(newOrders);
   };
 
-  // Add new order
+  // ✅ Place new order
   const placeOrder = (order) => {
     const newOrder = {
       ...order,
-      id: Date.now(),
+      id: Date.now(), // unique order ID
       createdAt: new Date().toISOString(),
     };
+
     const updatedOrders = [newOrder, ...orders];
     saveOrders(updatedOrders);
     showToast("Order placed successfully!", "success");
     return newOrder;
   };
 
-  // Optional: Clear all orders for current user
+  // ❌ Clear all orders for this user (optional)
   const clearOrders = () => {
     saveOrders([]);
-    showToast("Order history cleared.", "info");
+    showToast("Order history cleared", "info");
   };
 
   return (

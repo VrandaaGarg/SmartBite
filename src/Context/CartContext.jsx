@@ -6,38 +6,41 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
-  const [cart, setCart] = useState([]);
   const { showToast } = useToast();
 
+  const [cart, setCart] = useState([]);
+  const [cartLoaded, setCartLoaded] = useState(false); // 🆕 prevent early overwrite
+
+  // Load cart from localStorage
   useEffect(() => {
     if (user?.id) {
       const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
       setCart(userCart[user.id] || []);
-    }
-    // Do NOT clear cart unless user is explicitly logged out
-    else if (user === null) {
+      setCartLoaded(true); // ✅ only once loaded
+    } else if (user === null) {
       setCart([]);
     }
   }, [user]);
 
+  // Save cart to localStorage only after it's loaded
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && cartLoaded) {
       const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
       userCart[user.id] = cart;
       localStorage.setItem("user_cart", JSON.stringify(userCart));
     }
-  }, [cart, user]);
+  }, [cart, user, cartLoaded]);
 
   const addToCart = (dish) => {
     setCart((prev) => {
       const exists = prev.find((item) => item.id === dish.id);
       if (exists) {
-        showToast("Item already in cart update quantity", "warning");
+        showToast("Item already in cart. Quantity updated.", "warning");
         return prev.map((item) =>
           item.id === dish.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
-        showToast("Item added to cart", "success");
+        showToast("Item added to cart!", "success");
         return [...prev, { ...dish, quantity: 1 }];
       }
     });

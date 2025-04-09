@@ -9,15 +9,26 @@ const Menu = () => {
   const { addToCart } = useCart(); // ✅ from CartContext
 
   const getVegOrNonVeg = (dish) => {
-    const vegKeywords = ["Paneer", "Dal", "Veg", "Chaas", "Lassi", "Rasmalai", "Gulab"];
-    return vegKeywords.some((word) => dish.name.toLowerCase().includes(word.toLowerCase()))
+    const vegKeywords = [
+      "Paneer",
+      "Dal",
+      "Veg",
+      "Chaas",
+      "Lassi",
+      "Rasmalai",
+      "Gulab",
+    ];
+    return vegKeywords.some((word) =>
+      dish.name.toLowerCase().includes(word.toLowerCase())
+    )
       ? "veg"
       : "non-veg";
   };
 
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.menuId === selectedMenuId : true;
-    const matchType = filter.type === "all" || getVegOrNonVeg(dish) === filter.type;
+    const matchType =
+      filter.type === "all" || getVegOrNonVeg(dish) === filter.type;
     const matchPrice = dish.price <= filter.maxPrice;
     return matchMenu && matchType && matchPrice;
   });
@@ -72,7 +83,9 @@ const Menu = () => {
                   : "bg-gray-200 text-gray-700"
               }`}
             >
-              {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
+              {type === "all"
+                ? "All"
+                : type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
           ))}
         </div>

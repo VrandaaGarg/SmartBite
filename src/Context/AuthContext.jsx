@@ -28,8 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("current_user");
-    localStorage.removeItem("user_cart");
+    localStorage.removeItem("current_user"); // ✅ required
   };
 
   return (

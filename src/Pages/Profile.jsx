@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { FaUserEdit, FaSave, FaSignOutAlt } from "react-icons/fa";
+import { useToast } from "../Context/ToastContext";
 
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -16,6 +18,7 @@ const Profile = () => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+    showToast("Logged out successfully", "success");
   };
 
   const handleChange = (e) => {
@@ -25,10 +28,12 @@ const Profile = () => {
     }));
   };
 
+  //button for saving changes
   const handleSave = () => {
     const updatedUser = { ...user, ...formData };
     localStorage.setItem("current_user", JSON.stringify(updatedUser));
     setIsEditing(false);
+    showToast("Profile updated successfully", "success");
   };
 
   if (!user) {
@@ -53,21 +58,27 @@ const Profile = () => {
       <div className="space-y-4">
         {/* Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Name
+          </label>
           <input
             name="name"
             value={formData.name}
             disabled={!isEditing}
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded border ${
-              isEditing ? "bg-white border-gray-300" : "bg-gray-100 text-gray-500"
+              isEditing
+                ? "bg-white border-gray-300"
+                : "bg-gray-100 text-gray-500"
             }`}
           />
         </div>
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Email
+          </label>
           <input
             value={user.email}
             disabled
@@ -77,21 +88,27 @@ const Profile = () => {
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Phone
+          </label>
           <input
             name="phone"
             value={formData.phone}
             disabled={!isEditing}
             onChange={handleChange}
             className={`w-full px-4 py-2 rounded border ${
-              isEditing ? "bg-white border-gray-300" : "bg-gray-100 text-gray-500"
+              isEditing
+                ? "bg-white border-gray-300"
+                : "bg-gray-100 text-gray-500"
             }`}
           />
         </div>
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Address
+          </label>
           <textarea
             name="address"
             value={formData.address}
@@ -99,7 +116,9 @@ const Profile = () => {
             onChange={handleChange}
             rows="3"
             className={`w-full px-4 py-2 rounded border ${
-              isEditing ? "bg-white border-gray-300" : "bg-gray-100 text-gray-500"
+              isEditing
+                ? "bg-white border-gray-300"
+                : "bg-gray-100 text-gray-500"
             }`}
           />
         </div>

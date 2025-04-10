@@ -1,12 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { dishes } from "../Data/dishes";
 import { menus } from "../Data/menus";
-import { useCart } from "../Context/CartContext"; // ✅ make sure path is correct
+import { useCart } from "../Context/CartContext";
+import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-icons/fa";
+import { useToast } from "../Context/ToastContext";
 
 const Menu = () => {
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [filter, setFilter] = useState({ type: "all", maxPrice: 1000 });
-  const { addToCart } = useCart(); // ✅ from CartContext
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
+  
+  // Animation effect when component mounts or filters change
+  useEffect(() => {
+    setAnimateIn(false);
+    const timer = setTimeout(() => setAnimateIn(true), 100);
+    return () => clearTimeout(timer);
+  }, [selectedMenuId, filter, searchQuery]);
 
   const getVegOrNonVeg = (dish) => {
     const vegKeywords = [
@@ -25,12 +38,20 @@ const Menu = () => {
       : "non-veg";
   };
 
+  const handleAddToCart = (dish) => {
+    addToCart(dish);
+    showToast(`Added ${dish.name} to cart`, "success");
+  };
+
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.menuId === selectedMenuId : true;
     const matchType =
       filter.type === "all" || getVegOrNonVeg(dish) === filter.type;
     const matchPrice = dish.price <= filter.maxPrice;
-    return matchMenu && matchType && matchPrice;
+    const matchSearch = searchQuery === "" || 
+      dish.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      dish.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchMenu && matchType && matchPrice && matchSearch;
   });
 
   const priceRanges = [
@@ -41,114 +62,254 @@ const Menu = () => {
     { label: "< ₹400", max: 400 },
   ];
 
+  const currentCategoryName = selectedMenuId 
+    ? menus.find(menu => menu.id === selectedMenuId)?.name
+    : "All Items";
+
   return (
-    <div className="p-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6 text-red-700">
-        Explore Our Menu
-      </h1>
-
-      {/* Category Filter */}
-      <div className="flex flex-wrap justify-center gap-4 mb-6">
-        {menus.map((menu) => (
+    <div className="py-8 px-4 max-w-7xl mx-auto">
+      {/* Page Header with Search */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-red-700 mb-1">
+            {currentCategoryName}
+          </h1>
+          <p className="text-gray-500">
+            {filteredDishes.length} items available
+          </p>
+        </div>
+        <div className="w-full md:w-auto flex">
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder="Search dishes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
           <button
-            key={menu.id}
-            onClick={() =>
-              setSelectedMenuId(menu.id === selectedMenuId ? null : menu.id)
-            }
-            className={`rounded-full px-6 py-3 text-sm font-semibold border-2 ${
-              selectedMenuId === menu.id
-                ? "bg-red-600 text-white border-red-600"
-                : "bg-white text-red-600 border-red-300 hover:bg-red-50"
-            } transition`}
+            onClick={() => setShowFilters(!showFilters)}
+            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-r-full border border-red-600 flex items-center gap-2"
           >
-            {menu.icon} {menu.name}
+            <FaFilter /> {!showFilters ? "Filters" : "Hide"}
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Veg / Non-Veg / Price Filters */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-        <div className="space-x-2">
-          {["all", "veg", "non-veg"].map((type) => (
+      {/* Category Scrollable Filters */}
+      <div className="mb-6 overflow-x-auto pb-2 hide-scrollbar">
+        <div className="flex gap-2 min-w-max">
+          <button
+            onClick={() => setSelectedMenuId(null)}
+            className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
+              selectedMenuId === null
+                ? "bg-red-600 text-white border-red-600 shadow-md"
+                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+            } transition-all duration-200`}
+          >
+            <FaUtensils className="text-lg" />
+            All Categories
+          </button>
+          
+          {menus.map((menu) => (
             <button
-              key={type}
-              onClick={() => setFilter((f) => ({ ...f, type }))}
-              className={`px-4 py-2 rounded ${
-                filter.type === type
-                  ? type === "veg"
-                    ? "bg-green-600 text-white"
-                    : type === "non-veg"
-                    ? "bg-yellow-600 text-white"
-                    : "bg-red-600 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
+              key={menu.id}
+              onClick={() => setSelectedMenuId(menu.id === selectedMenuId ? null : menu.id)}
+              className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
+                selectedMenuId === menu.id
+                  ? "bg-red-600 text-white border-red-600 shadow-md"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              } transition-all duration-200`}
             >
-              {type === "all"
-                ? "All"
-                : type.charAt(0).toUpperCase() + type.slice(1)}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {priceRanges.map((range) => (
-            <button
-              key={range.label}
-              onClick={() => setFilter((f) => ({ ...f, maxPrice: range.max }))}
-              className={`px-4 py-2 rounded ${
-                filter.maxPrice === range.max
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              {range.label}
+              <span className="text-lg">{menu.icon}</span>
+              {menu.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Dish Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {/* Expanded Filter Options */}
+      {showFilters && (
+        <div className="bg-white p-4 rounded-lg shadow-md mb-6 transition-all duration-300">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Diet Type Filter */}
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold mb-2 text-gray-700">Diet Type</h3>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilter((f) => ({ ...f, type: "all" }))}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "all"
+                      ? "bg-red-100 text-red-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <FaUtensils className={filter.type === "all" ? "text-red-600" : "text-gray-500"} />
+                  All
+                </button>
+                <button
+                  onClick={() => setFilter((f) => ({ ...f, type: "veg" }))}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "veg"
+                      ? "bg-green-100 text-green-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <FaLeaf className={filter.type === "veg" ? "text-green-600" : "text-gray-500"} />
+                  Vegetarian
+                </button>
+                <button
+                  onClick={() => setFilter((f) => ({ ...f, type: "non-veg" }))}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "non-veg"
+                      ? "bg-yellow-100 text-yellow-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <FaDrumstickBite className={filter.type === "non-veg" ? "text-yellow-600" : "text-gray-500"} />
+                  Non-Vegetarian
+                </button>
+              </div>
+            </div>
+            
+            {/* Price Filter */}
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold mb-2 text-gray-700">Price Range</h3>
+              <div className="flex flex-wrap gap-2">
+                {priceRanges.map((range) => (
+                  <button
+                    key={range.label}
+                    onClick={() => setFilter((f) => ({ ...f, maxPrice: range.max }))}
+                    className={`px-4 py-2 rounded-full transition-all ${
+                      filter.maxPrice === range.max
+                        ? "bg-red-100 text-red-800 font-medium"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {filteredDishes.length === 0 && (
+        <div className="text-center py-12">
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/1021/1021262.png"
+            alt="No results"
+            className="w-24 h-24 mx-auto mb-4 opacity-30"
+          />
+          <h3 className="text-xl font-semibold text-gray-500 mb-2">No dishes found</h3>
+          <p className="text-gray-500">Try adjusting your filters or search query</p>
+          <button
+            onClick={() => {
+              setSelectedMenuId(null);
+              setFilter({ type: "all", maxPrice: 1000 });
+              setSearchQuery("");
+            }}
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition"
+          >
+            Reset All Filters
+          </button>
+        </div>
+      )}
+
+      {/* Dish Cards with Animation */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredDishes.map((dish) => (
           <div
             key={dish.id}
-            className="bg-white rounded-xl shadow hover:shadow-lg transition flex flex-col"
+            className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${
+              animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            } group hover:-translate-y-1`}
+            style={{
+              transitionDelay: `${Math.random() * 0.3}s`,
+            }}
           >
-            <img
-              src={dish.image}
-              alt={dish.name}
-              className="w-full h-40 object-cover rounded-t-xl"
-            />
-            <div className="p-4 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-semibold text-lg text-gray-800 mb-1">
-                  {dish.name}
-                </h3>
-                <p className="text-gray-600 text-sm line-clamp-2">
-                  {dish.description}
-                </p>
-              </div>
-              <div className="mt-3 flex justify-between items-center">
-                <span className="font-bold text-red-600">₹{dish.price}</span>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${
-                    getVegOrNonVeg(dish) === "veg"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {getVegOrNonVeg(dish).toUpperCase()}
-                </span>
-              </div>
-              <button
-                onClick={() => addToCart(dish)}
-                className="mt-4 w-full bg-yellow-400 text-black font-semibold py-2 rounded hover:bg-yellow-300 transition"
+            <div className="relative overflow-hidden">
+              <img
+                src={dish.image}
+                alt={dish.name}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <span
+                className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${
+                  getVegOrNonVeg(dish) === "veg"
+                    ? "bg-green-500 text-white"
+                    : "bg-yellow-500 text-white"
+                }`}
               >
-                Add to Cart
-              </button>
+                {getVegOrNonVeg(dish) === "veg" ? (
+                  <span className="flex items-center gap-1">
+                    <FaLeaf /> Veg
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <FaDrumstickBite /> Non-Veg
+                  </span>
+                )}
+              </span>
+            </div>
+            <div className="p-5">
+              <h3 className="font-bold text-lg text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                {dish.name}
+              </h3>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[40px]">
+                {dish.description}
+              </p>
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-bold text-red-600">₹{dish.price}</span>
+                <button
+                  onClick={() => handleAddToCart(dish)}
+                  className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-semibold py-2 px-4 rounded-lg transition-all flex items-center gap-1"
+                >
+                  + Add
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Pagination - Placeholder for future implementation */}
+      {filteredDishes.length > 0 && (
+        <div className="mt-12 flex justify-center">
+          <div className="bg-white shadow-sm rounded-full px-2">
+            <button className="px-4 py-2 text-gray-600 hover:text-red-600 disabled:opacity-50">
+              ←
+            </button>
+            <button className="px-4 py-2 bg-red-600 text-white rounded-full">
+              1
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:text-red-600">
+              2
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:text-red-600">
+              3
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:text-red-600">
+              →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add these styles to your CSS file for hiding scrollbars nicely */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

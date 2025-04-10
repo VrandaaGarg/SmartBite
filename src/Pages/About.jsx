@@ -1,63 +1,356 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FaUtensils, FaAward, FaUsers, FaStar, FaLeaf, FaTruck, FaMapMarkerAlt, FaBook } from "react-icons/fa";
 
 const About = () => {
+  const [animatedStats, setAnimatedStats] = useState(false);
+  const [visibleSection, setVisibleSection] = useState("");
+
+  // Statistics to be animated
+  const stats = [
+    { id: 'customers', label: 'Happy Customers', value: 5000, icon: FaUsers, color: 'bg-yellow-100 text-yellow-600' },
+    { id: 'dishes', label: 'Dishes', value: 100, icon: FaUtensils, color: 'bg-red-100 text-red-600' },
+    { id: 'chefs', label: 'Expert Chefs', value: 25, icon: FaAward, color: 'bg-blue-100 text-blue-600' },
+    { id: 'rating', label: 'Customer Rating', value: 4.8, icon: FaStar, color: 'bg-green-100 text-green-600', suffix: '/5' }
+  ];
+
+  // Our values
+  const values = [
+    {
+      icon: FaLeaf,
+      title: "Fresh Ingredients",
+      description: "We source local, seasonal ingredients to ensure every dish is made with the freshest components available."
+    },
+    {
+      icon: FaUtensils,
+      title: "Authentic Recipes",
+      description: "Our recipes have been perfected over generations, preserving traditional flavors while adding modern touches."
+    },
+    {
+      icon: FaTruck,
+      title: "Reliable Delivery",
+      description: "We prioritize timely delivery so your food arrives hot, fresh and exactly when you need it."
+    },
+    {
+      icon: FaUsers,
+      title: "Customer First",
+      description: "Your satisfaction drives everything we do. We listen to feedback and constantly improve our service."
+    }
+  ];
+
+  // Team members
+  const team = [
+    {
+      name: "Rahul Sharma",
+      role: "Executive Chef",
+      bio: "With 15 years of experience in Indian cuisine, Chef Rahul brings authentic flavors and innovative techniques to every dish.",
+      image: "https://randomuser.me/api/portraits/men/32.jpg"
+    },
+    {
+      name: "Priya Patel",
+      role: "Founder & CEO",
+      bio: "Priya founded SmartBite with a vision to bring homestyle Indian food to everyone's doorstep with just a few taps.",
+      image: "https://randomuser.me/api/portraits/women/44.jpg"
+    },
+    {
+      name: "Arjun Singh",
+      role: "Operations Manager",
+      bio: "Arjun ensures that every order is processed efficiently and delivered with SmartBite's signature quality and care.",
+      image: "https://randomuser.me/api/portraits/men/67.jpg"
+    }
+  ];
+
+  // Intersection Observer for animation triggers
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3,
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute('id');
+          setVisibleSection(sectionId);
+          
+          if (sectionId === 'stats-section') {
+            setAnimatedStats(true);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    
+    const sections = document.querySelectorAll('.observe-section');
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+    return () => {
+      sections.forEach(section => {
+        observer.unobserve(section);
+      });
+    };
+  }, []);
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-center text-red-600 mb-10">
-        About SmartBite 🍽️
-      </h1>
+    <div className="bg-white overflow-x-hidden">
+      {/* Hero Section */}
+      <section className="relative py-20 bg-gradient-to-br from-red-700 to-red-600 text-white">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-yellow-400"></div>
+          <div className="absolute top-1/2 -right-12 w-48 h-48 rounded-full bg-red-800"></div>
+          <div className="absolute -bottom-12 left-1/4 w-36 h-36 rounded-full bg-yellow-300"></div>
+        </div>
+        
+        <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Our Story</h1>
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto text-red-100">
+            From a small kitchen to your favorite food delivery app - the journey of bringing authentic Indian flavors to your doorstep.
+          </p>
+        </div>
+      </section>
 
       {/* Brand Story */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold text-red-500 mb-4">Our Story</h2>
-        <p className="text-gray-700 leading-relaxed text-lg">
-          SmartBite was born out of a simple craving — a craving for authentic, home-style Indian food
-          that doesn't just satisfy hunger, but also warms the heart. What started as a small family
-          kitchen has now grown into a full-fledged digital restaurant serving hundreds of happy customers
-          every day. At SmartBite, we're on a mission to bring the joy of real Indian food to your doorstep,
-          without compromising on quality, hygiene, or taste.
-        </p>
-      </section>
-
-      {/* Philosophy */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold text-red-500 mb-4">What We Believe</h2>
-        <p className="text-gray-700 leading-relaxed text-lg">
-          Food is not just about taste — it's about tradition, care, and connection. That’s why every dish
-          at SmartBite is prepared with fresh ingredients, traditional recipes, and a dash of love. We believe
-          in the power of good food to make your day better, bring families together, and create memories
-          that linger long after the last bite.
-        </p>
-      </section>
-
-      {/* Why SmartBite */}
-      <section className="mb-12 grid md:grid-cols-2 gap-10">
-        <div>
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Why Choose SmartBite?</h2>
-          <ul className="list-disc list-inside text-gray-700 space-y-3 text-lg">
-            <li>✅ Fresh, locally sourced ingredients</li>
-            <li>✅ Diverse menu with both veg and non-veg options</li>
-            <li>✅ Hygienically cooked and safely packaged</li>
-            <li>✅ Quick delivery with real-time order tracking</li>
-            <li>✅ Seamless online ordering with secure payments</li>
-          </ul>
+      <section id="story-section" className="observe-section py-16 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className={`transform transition-all duration-1000 ${
+              visibleSection === "story-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+            }`}>
+              <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Story</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">
+                From Passion to Plate
+              </h2>
+              <div className="space-y-4 text-gray-700">
+                <p>
+                  SmartBite was born out of a simple craving — a craving for authentic, home-style Indian food
+                  that doesn't just satisfy hunger, but also warms the heart. What started as a small family
+                  kitchen in 2015 has now grown into a full-fledged digital restaurant.
+                </p>
+                <p>
+                  Our founder, Priya Patel, noticed that while food delivery apps were booming, the quality and authenticity
+                  of Indian cuisine was often compromised. Determined to change this, she gathered family recipes passed
+                  down through generations and assembled a team of passionate chefs.
+                </p>
+                <p>
+                  Today, SmartBite serves hundreds of happy customers every day, bringing the true taste of India
+                  to your doorstep. Our mission remains unchanged — deliver food that's not just a meal, but an experience.
+                </p>
+              </div>
+            </div>
+            <div className={`grid grid-cols-2 gap-4 transform transition-all duration-1000 ${
+              visibleSection === "story-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
+            }`}>
+              <div className="space-y-4">
+                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40" alt="Food preparation" 
+                  className="rounded-lg shadow-lg" />
+                <img src="https://images.unsplash.com/photo-1534939561126-855b8675edd7" alt="Fresh ingredients" 
+                  className="rounded-lg shadow-lg transform translate-y-8" />
+              </div>
+              <div className="space-y-4 transform translate-y-12">
+                <img src="https://images.unsplash.com/photo-1613545325278-f24b0cae1224" alt="Indian curry" 
+                  className="rounded-lg shadow-lg" />
+                <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8" alt="Chef cooking" 
+                  className="rounded-lg shadow-lg" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="rounded-lg overflow-hidden shadow-lg">
-          <img
-            src="https://images.unsplash.com/photo-1604908554168-3f2cdd79a6e4"
-            alt="Indian food served in plate"
-            className="w-full h-full object-cover"
-          />
+      </section>
+
+      {/* Statistics */}
+      <section id="stats-section" className="observe-section bg-gray-50 py-16 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-12">Our Journey in Numbers</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={stat.id} className="bg-white rounded-xl shadow-md p-6">
+                <div className={`mx-auto ${stat.color} w-16 h-16 rounded-full flex items-center justify-center mb-4`}>
+                  <stat.icon className="text-2xl" />
+                </div>
+                <h3 className="text-4xl font-bold text-gray-800">
+                  {animatedStats ? (
+                    <>
+                      {stat.id === 'rating' ? stat.value : "0"}
+                      {stat.suffix || ''}
+                    </>
+                  ) : (
+                    <>
+                      0{stat.suffix || ''}
+                    </>
+                  )}
+                </h3>
+                <p className="text-gray-600 mt-2">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Final Note / Testimonial */}
-      <section className="text-center mt-16">
-        <p className="text-xl italic text-gray-600 max-w-3xl mx-auto">
-          “Whether you're missing home-cooked meals, planning a family dinner, or simply too tired to cook —
-          SmartBite is here to serve comfort in every bite.”
-        </p>
-        <p className="mt-4 font-semibold text-gray-800">— From Our Kitchen, With Love ❤️</p>
+      {/* Our Values */}
+      <section id="values-section" className="observe-section py-16 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Values</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2">
+              What We Stand For
+            </h2>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((value, index) => (
+              <div 
+                key={index} 
+                className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all transform ${
+                  visibleSection === "values-section" 
+                    ? "translate-y-0 opacity-100" 
+                    : "translate-y-8 opacity-0"
+                }`}
+                style={{ transitionDelay: `${index * 150}ms`, transitionDuration: '800ms' }}
+              >
+                <div className="bg-red-50 text-red-600 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                  <value.icon className="text-2xl" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-3">{value.title}</h3>
+                <p className="text-gray-600">{value.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Meet the Team */}
+      <section id="team-section" className="observe-section bg-gray-50 py-16 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Team</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2">
+              Meet the Faces Behind SmartBite
+            </h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {team.map((member, index) => (
+              <div 
+                key={index} 
+                className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-1000 ${
+                  visibleSection === "team-section" 
+                    ? "translate-y-0 opacity-100" 
+                    : "translate-y-8 opacity-0"
+                }`}
+                style={{ transitionDelay: `${index * 200}ms` }}
+              >
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  className="w-full h-64 object-cover object-center"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-800">{member.name}</h3>
+                  <p className="text-red-600 mb-4">{member.role}</p>
+                  <p className="text-gray-600">{member.bio}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Map/Locations */}
+      <section id="locations-section" className="observe-section py-16 md:py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className={`transform transition-all duration-1000 ${
+              visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+            }`}>
+              <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Kitchens</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">
+                Where the Magic Happens
+              </h2>
+              <p className="text-gray-700 mb-6">
+                SmartBite operates from multiple cloud kitchens across the city, strategically located to ensure
+                fast delivery and maximum freshness. Each kitchen follows the same rigorous standards and recipes.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-50 p-2 rounded-full">
+                    <FaMapMarkerAlt className="text-red-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Central Kitchen</h4>
+                    <p className="text-gray-600">52, Food Street, Flavor Avenue, Central City</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-50 p-2 rounded-full">
+                    <FaMapMarkerAlt className="text-red-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">North Kitchen</h4>
+                    <p className="text-gray-600">24, Spice Road, Northern District</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="bg-red-50 p-2 rounded-full">
+                    <FaMapMarkerAlt className="text-red-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">South Kitchen</h4>
+                    <p className="text-gray-600">108, Curry Lane, Southern Heights</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className={`transform transition-all duration-1000 ${
+              visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
+            }`}>
+              {/* Placeholder for map - in a real app, this would be a map component */}
+              <div className="bg-gray-200 w-full h-80 rounded-xl overflow-hidden shadow-lg relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-gray-500 font-medium">Interactive Map</p>
+                    <p className="text-sm text-gray-400">Find our nearest location</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-red-600 py-16 px-6 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Taste the SmartBite Difference
+          </h2>
+          <p className="text-lg text-red-100 mb-8 max-w-2xl mx-auto">
+            Ready to experience our delicious food and exceptional service?
+            Explore our menu and place your first order today.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/menu"
+              className="bg-white text-red-600 hover:bg-yellow-50 px-8 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+            >
+              <FaUtensils className="inline-block mr-2" /> View Our Menu
+            </Link>
+            <Link
+              to="/about"
+              className="bg-transparent border-2 border-white hover:bg-red-500 px-8 py-3 rounded-full font-semibold text-lg transition-all"
+            >
+              <FaBook className="inline-block mr-2" /> Our Story
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   );

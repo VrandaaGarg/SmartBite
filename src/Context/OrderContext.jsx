@@ -31,7 +31,7 @@ export const OrderProvider = ({ children }) => {
     setOrders(newOrders);
   };
 
-  // ✅ Place new order
+  // ✅ Place new order - updated to ensure toast auto-removes after 3 seconds
   const placeOrder = (order) => {
     const newOrder = {
       ...order,
@@ -41,7 +41,9 @@ export const OrderProvider = ({ children }) => {
   
     const updatedOrders = [newOrder, ...orders];
     saveOrders(updatedOrders);
-    showToast("Order placed successfully!", "success");
+    
+    // Show a single toast message that will auto-remove after 3 seconds (handled by ToastContext)
+    showToast("Order placed successfully! A confirmation has been sent to your email.", "success");
   
     // ✅ Send email to admin
     emailjs.send(
@@ -66,9 +68,8 @@ export const OrderProvider = ({ children }) => {
     .then(() => console.log("✅ Order mail sent to admin and customer"))
     .catch((err) => console.error("❌ Failed to send email:", err));
     
-    
     return newOrder;
-  };;
+  };
 
   // ❌ Clear all orders for this user (optional)
   const clearOrders = () => {

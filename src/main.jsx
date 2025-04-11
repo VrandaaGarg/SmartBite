@@ -26,8 +26,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
+    <ToastProvider>
       <AuthProvider>
-        <ToastProvider>
+       
           <CartProvider>
             <OrderProvider>
               <Routes>
@@ -62,8 +63,9 @@ root.render(
               </Routes>
             </OrderProvider>
           </CartProvider>
-        </ToastProvider>
+        
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

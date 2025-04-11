@@ -1,17 +1,34 @@
-import { createContext, useContext, useState } from "react";
-import { useToast } from "./ToastContext";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
+import { useToast } from "./ToastContext"; // ✅
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const showToast = useToast();
-
-  // Load user from localStorage safely
+  const { showToast } = useToast(); 
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("current_user") || "null")
   );
 
-  // Login method
+  // Debounced Toast Handler
+  const toastTimeoutRef = useRef(null);
+  const pendingToastRef = useRef(null);
+
+  const showSingleToast = useCallback((message, type) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = null;
+    }
+
+    pendingToastRef.current = { message, type };
+
+    toastTimeoutRef.current = setTimeout(() => {
+      if (pendingToastRef.current) {
+        showToast(pendingToastRef.current.message, pendingToastRef.current.type);
+        pendingToastRef.current = null;
+      }
+    }, 300);
+  }, [showToast]);
+
   const login = (email, password) => {
     const stored = JSON.parse(localStorage.getItem("current_user") || "null");
     if (
@@ -20,29 +37,27 @@ export const AuthProvider = ({ children }) => {
       stored.password === password
     ) {
       setUser(stored);
-      showToast("Logged in successfully", "success");
+      showSingleToast("Logged in successfully", "success");
       return { success: true };
     }
     return { success: false, message: "Invalid email or password" };
   };
 
-  // Signup method
   const signup = (newUser) => {
     const userWithId = {
       ...newUser,
-      id: Date.now(), // You can also use crypto.randomUUID()
+      id: Date.now(),
     };
     localStorage.setItem("current_user", JSON.stringify(userWithId));
     setUser(userWithId);
-    showToast("Account created successfully", "success");
+    showSingleToast("Account created successfully", "success");
     return { success: true };
   };
 
-  // Logout method
   const logout = () => {
     setUser(null);
     localStorage.removeItem("current_user");
-    showToast("Logged out successfully", "success");
+    showSingleToast("Logged out successfully", "success");
     return { success: true };
   };
 
@@ -53,5 +68,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook to use auth context
 export const useAuth = () => useContext(AuthContext);

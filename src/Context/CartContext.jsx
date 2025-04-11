@@ -10,11 +10,11 @@ export const CartProvider = ({ children }) => {
 
   const [cart, setCart] = useState([]);
   const [cartLoaded, setCartLoaded] = useState(false);
-  
+
   // Improved toast management with global timeout ref
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
-  
+
   // Single function to handle all toast messages with improved debouncing
   const showSingleToast = useCallback((message, type) => {
     // Clear any pending toast timeouts
@@ -22,10 +22,10 @@ export const CartProvider = ({ children }) => {
       clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = null;
     }
-    
+
     // Store the intent to show a toast, but don't show immediately
     pendingToastRef.current = { message, type };
-    
+
     // Use a single timeout to show the toast after all state updates
     toastTimeoutRef.current = setTimeout(() => {
       if (pendingToastRef.current) {
@@ -70,19 +70,19 @@ export const CartProvider = ({ children }) => {
     setCart(prevCart => {
       // Check if item already exists
       const exists = prevCart.find((x) => x.id === item.id);
-      
+
       if (exists) {
         // Only show toast after state update is complete
-        
-        
+
+
         // Return updated cart
         return prevCart.map((x) =>
           x.id === item.id ? { ...x, quantity: x.quantity + 1 } : x
         );
       } else {
         // Only show toast after state update is complete
-      
-        
+
+
         // Return updated cart
         return [...prevCart, { ...item, quantity: 1 }];
       }
@@ -95,8 +95,8 @@ export const CartProvider = ({ children }) => {
       removeFromCart(id);
       return;
     }
-    
-    setCart(prevCart => 
+
+    setCart(prevCart =>
       prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
   }, []);
@@ -105,12 +105,12 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = useCallback((id) => {
     setCart(prevCart => {
       const itemToRemove = prevCart.find((item) => item.id === id);
-      
+
       if (itemToRemove) {
         // Show toast only once after the operation is complete
         showSingleToast(`${itemToRemove.name} removed from cart`, "info");
       }
-      
+
       return prevCart.filter((item) => item.id !== id);
     });
   }, [showSingleToast]);

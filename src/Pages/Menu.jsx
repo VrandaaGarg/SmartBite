@@ -3,6 +3,8 @@ import { dishes } from "../Data/dishes";
 import { menus } from "../Data/menus";
 import { useCart } from "../Context/CartContext";
 import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-icons/fa";
+import { useAuth } from "../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
 
 const Menu = () => {
@@ -13,6 +15,9 @@ const Menu = () => {
   const [animateIn, setAnimateIn] = useState(false);
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();// 👈 your user context
+
   
   // Animation effect when component mounts or filters change
   useEffect(() => {
@@ -39,9 +44,16 @@ const Menu = () => {
   };
 
   const handleAddToCart = (dish) => {
+    if (!user) {
+      showToast("Please login to add items to your cart", "error");
+      navigate("/login");
+      return;
+    }
+  
     addToCart(dish);
     showToast(`Added ${dish.name} to cart`, "success");
   };
+  
 
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.menuId === selectedMenuId : true;

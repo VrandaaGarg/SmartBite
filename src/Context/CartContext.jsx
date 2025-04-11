@@ -73,7 +73,7 @@ export const CartProvider = ({ children }) => {
       
       if (exists) {
         // Only show toast after state update is complete
-        showSingleToast(`${item.name} quantity updated in cart`, "success");
+        
         
         // Return updated cart
         return prevCart.map((x) =>
@@ -81,7 +81,7 @@ export const CartProvider = ({ children }) => {
         );
       } else {
         // Only show toast after state update is complete
-        showSingleToast(`${item.name} added to cart`, "success");
+      
         
         // Return updated cart
         return [...prevCart, { ...item, quantity: 1 }];

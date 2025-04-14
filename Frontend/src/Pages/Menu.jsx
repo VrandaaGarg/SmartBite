@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { dishes } from "../Data/dishes";
+// import { dishes } from "../Data/dishes";
 import { menus } from "../Data/menus";
 import { useCart } from "../Context/CartContext";
 import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-icons/fa";
@@ -10,6 +10,7 @@ import { useToast } from "../Context/ToastContext";
 const Menu = () => {
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [filter, setFilter] = useState({ type: "all", maxPrice: 1000 });
+  const [dishes, setDishes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -17,6 +18,16 @@ const Menu = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();// 👈 your user context
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/dishes")
+      .then((res) => res.json())
+      .then((data) => setDishes(data))
+      .catch((err) => {
+        console.error("Error fetching dishes:", err);
+        showToast("Failed to load dishes!", "error");
+      });
+  }, []);
 
   
   // Animation effect when component mounts or filters change
@@ -37,7 +48,7 @@ const Menu = () => {
       "Gulab",
     ];
     return vegKeywords.some((word) =>
-      dish.name.toLowerCase().includes(word.toLowerCase())
+      dish.Name.toLowerCase().includes(word.toLowerCase())
     )
       ? "veg"
       : "non-veg";
@@ -51,19 +62,19 @@ const Menu = () => {
     }
   
     addToCart(dish);
-    showToast(`Added ${dish.name} to cart`, "success");
+    showToast(`Added ${dish.Name} to cart`, "success");
   };
   
 
   const filteredDishes = dishes.filter((dish) => {
-    const matchMenu = selectedMenuId ? dish.menuId === selectedMenuId : true;
+    const matchMenu = selectedMenuId ? dish.MenuID === selectedMenuId : true;
     const matchType =
       filter.type === "all" || getVegOrNonVeg(dish) === filter.type;
-    const matchPrice = dish.price <= filter.maxPrice;
+    const matchPrice = dish.Price <= filter.maxPrice;
     const matchSearch = searchQuery === "" || 
-      dish.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      dish.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchMenu && matchType && matchPrice && matchSearch;
+      dish.Name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      dish.Description.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchMenu && matchType && matchPrice && matchSearch;
   });
 
   const priceRanges = [
@@ -236,7 +247,7 @@ const Menu = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredDishes.map((dish) => (
           <div
-            key={dish.id}
+            key={dish.DishID}
             className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${
               animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             } group hover:-translate-y-1`}
@@ -246,8 +257,8 @@ const Menu = () => {
           >
             <div className="relative overflow-hidden">
               <img
-                src={dish.image}
-                alt={dish.name}
+                src={dish.Image}
+                alt={dish.Name}
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <span
@@ -270,13 +281,13 @@ const Menu = () => {
             </div>
             <div className="p-5">
               <h3 className="font-bold text-lg text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
-                {dish.name}
+                {dish.Name}
               </h3>
               <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[40px]">
                 {dish.description}
               </p>
               <div className="flex justify-between items-center">
-                <span className="text-xl font-bold text-red-600">₹{dish.price}</span>
+                <span className="text-xl font-bold text-red-600">₹{dish.Price}</span>
                 <button
                   onClick={() => handleAddToCart(dish)}
                   className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-semibold py-2 px-4 rounded-lg transition-all flex items-center gap-1"

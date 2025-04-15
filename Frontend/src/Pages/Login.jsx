@@ -12,8 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [animate, setAnimate] = useState(false);
-  
-  // Animation on component mount
+
   useEffect(() => {
     setAnimate(true);
   }, []);
@@ -25,31 +24,20 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    
+
     try {
-      // Simulating network request
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const { success, message } = login(form.email, form.password);
+      const { success, message } = await login(form.email, form.password);
+
       if (success) {
         navigate("/");
       } else {
         setError(message || "Invalid credentials");
       }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Demo accounts for quick login
-  const demoAccounts = [
-    { email: "demo@example.com", password: "demo123", name: "Demo Account" },
-    { email: "test@example.com", password: "test123", name: "Test User" }
-  ];
-
-  const loginWithDemo = (demo) => {
-    setForm({ email: demo.email, password: demo.password });
-    // Don't auto-submit to allow the user to see the filled values
   };
 
   return (
@@ -61,13 +49,13 @@ const Login = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to continue to SmartBite</p>
         </div>
-        
+
         {error && (
           <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 animate-shake">
             <p className="text-sm">{error}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -89,7 +77,7 @@ const Login = () => {
               />
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
@@ -118,27 +106,7 @@ const Login = () => {
               </button>
             </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember"
-                name="remember"
-                type="checkbox"
-                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                Remember me
-              </label>
-            </div>
-            
-            <div className="text-sm">
-              <Link to="#" className="font-medium text-red-600 hover:text-red-700">
-                Forgot password?
-              </Link>
-            </div>
-          </div>
-          
+
           <button
             type="submit"
             disabled={isLoading}
@@ -161,32 +129,7 @@ const Login = () => {
             )}
           </button>
         </form>
-        
-        {/* Demo account section */}
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Quick Demo Login</span>
-            </div>
-          </div>
-          
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            {demoAccounts.map((demo, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => loginWithDemo(demo)}
-                className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-md transition"
-              >
-                {demo.name}
-              </button>
-            ))}
-          </div>
-        </div>
-        
+
         {/* Sign up link */}
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>Don't have an account?</p>

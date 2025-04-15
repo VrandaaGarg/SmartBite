@@ -7,13 +7,21 @@ import { useToast } from "../Context/ToastContext";
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
   const { showToast } = useToast();
+
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
+    name: user?.Name || "",
+    phone: user?.Phone || "",
+    houseNo: user?.HouseNo || "",
+    street: user?.Street || "",
+    landmark: user?.Landmark || "",
+    city: user?.City || "",
+    state: user?.State || "",
+    pincode: user?.Pincode || ""
   });
+
+  const fullAddress = `${formData.houseNo}, ${formData.street}${formData.landmark ? ", " + formData.landmark : ""}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
 
   const handleLogout = () => {
     logout();
@@ -28,12 +36,22 @@ const Profile = () => {
     }));
   };
 
-  //button for saving changes
   const handleSave = () => {
-    const updatedUser = { ...user, ...formData };
+    const updatedUser = {
+      ...user,
+      Name: formData.name,
+      Phone: formData.phone,
+      HouseNo: formData.houseNo,
+      Street: formData.street,
+      Landmark: formData.landmark,
+      City: formData.city,
+      State: formData.state,
+      Pincode: formData.pincode
+    };
+
     localStorage.setItem("current_user", JSON.stringify(updatedUser));
-    setIsEditing(false);
     showToast("Profile updated successfully", "success");
+    setIsEditing(false);
   };
 
   if (!user) {
@@ -66,11 +84,10 @@ const Profile = () => {
             value={formData.name}
             disabled={!isEditing}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded border ${
-              isEditing
+            className={`w-full px-4 py-2 rounded border ${isEditing
                 ? "bg-white border-gray-300"
                 : "bg-gray-100 text-gray-500"
-            }`}
+              }`}
           />
         </div>
 
@@ -80,7 +97,8 @@ const Profile = () => {
             Email
           </label>
           <input
-            value={user.email}
+            value={user.Email}
+
             disabled
             className="w-full px-4 py-2 rounded bg-gray-100 text-gray-500 border"
           />
@@ -96,32 +114,72 @@ const Profile = () => {
             value={formData.phone}
             disabled={!isEditing}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded border ${
-              isEditing
+            className={`w-full px-4 py-2 rounded border ${isEditing
                 ? "bg-white border-gray-300"
                 : "bg-gray-100 text-gray-500"
-            }`}
+              }`}
           />
         </div>
 
         {/* Address */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Address
-          </label>
+        {/* Address Fields (Editable) */}
+        {isEditing && (
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <input
+              name="houseNo"
+              value={formData.houseNo}
+              onChange={handleChange}
+              placeholder="House No"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+            <input
+              name="street"
+              value={formData.street}
+              onChange={handleChange}
+              placeholder="Street"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+            <input
+              name="landmark"
+              value={formData.landmark}
+              onChange={handleChange}
+              placeholder="Landmark"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+            <input
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              placeholder="City"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+            <input
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              placeholder="State"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+            <input
+              name="pincode"
+              value={formData.pincode}
+              onChange={handleChange}
+              placeholder="Pincode"
+              className="px-4 py-2 rounded border border-gray-300"
+            />
+          </div>
+        )}
+
+        {/* Full Address Display (When Not Editing) */}
+        {!isEditing && (
           <textarea
-            name="address"
-            value={formData.address}
-            disabled={!isEditing}
-            onChange={handleChange}
+            value={fullAddress}
+            disabled
             rows="3"
-            className={`w-full px-4 py-2 rounded border ${
-              isEditing
-                ? "bg-white border-gray-300"
-                : "bg-gray-100 text-gray-500"
-            }`}
+            className="w-full px-4 py-2 rounded bg-gray-100 text-gray-500 border mt-2"
           />
-        </div>
+        )}
+
       </div>
 
       {/* Buttons */}

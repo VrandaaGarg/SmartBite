@@ -1,15 +1,14 @@
 import { createContext, useContext, useState, useCallback, useRef } from "react";
-import { useToast } from "./ToastContext"; // ✅
+import { useToast } from "./ToastContext";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const { showToast } = useToast(); 
+  const { showToast } = useToast();
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("current_user") || "null")
   );
 
-  // Debounced Toast Handler
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
 
@@ -29,29 +28,71 @@ export const AuthProvider = ({ children }) => {
     }, 300);
   }, [showToast]);
 
-  const login = (email, password) => {
-    const stored = JSON.parse(localStorage.getItem("current_user") || "null");
-    if (
-      stored &&
-      stored.email.trim() === email.trim() &&
-      stored.password === password
-    ) {
-      setUser(stored);
-      showSingleToast("Logged in successfully", "success");
-      return { success: true };
+  // 🔐 Signup via backend
+  const signup = async ({
+    name, email, phone, password,
+    houseNo, street, landmark, city, state, pincode
+  }) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Name: name,
+          Email: email,
+          Phone: phone,
+          Password: password,
+          HouseNo: houseNo,
+          Street: street,
+          Landmark: landmark,
+          City: city,
+          State: state,
+          Pincode: pincode
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (res.status === 201) {
+        showSingleToast("Account created successfully", "success");
+  
+        // ✅ Auto-login using same credentials
+        return await login(email, password);
+      } else {
+        showSingleToast(data.error || "Signup failed", "error");
+        return { success: false, message: data.error };
+      }
+    } catch (err) {
+      showSingleToast("Signup failed", "error");
+      return { success: false, message: err.message };
     }
-    return { success: false, message: "Invalid email or password" };
   };
+  
 
-  const signup = (newUser) => {
-    const userWithId = {
-      ...newUser,
-      id: Date.now(),
-    };
-    localStorage.setItem("current_user", JSON.stringify(userWithId));
-    setUser(userWithId);
-    showSingleToast("Account created successfully", "success");
-    return { success: true };
+  // 🔐 Login via backend
+  const login = async (email, password) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Email: email, Password: password }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        const fullUser = { ...data.user, token: data.token };
+        setUser(fullUser);
+        localStorage.setItem("current_user", JSON.stringify(fullUser));
+        showSingleToast("Logged in successfully", "success");
+        return { success: true };
+      } else {
+        showSingleToast(data.error || "Login failed", "error");
+        return { success: false, message: data.error };
+      }
+    } catch (err) {
+      showSingleToast("Login failed", "error");
+      return { success: false, message: err.message };
+    }
   };
 
   const logout = () => {

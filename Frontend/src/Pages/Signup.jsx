@@ -121,32 +121,39 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep2()) return;
-    
+  
     setIsLoading(true);
     try {
-      // Simulating network request
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const fullAddress = `${form.houseNo}, ${form.street}${form.landmark ? ', ' + form.landmark : ''}, ${form.city}, ${form.state} - ${form.pincode}`;
-
-      const user = {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        phone: form.phone,
-        address: fullAddress,
-      };
-
-      const { success, message } = signup(user);
+      const {
+        name, email, password, phone,
+        houseNo, street, landmark, city, state, pincode
+      } = form;
+  
+      const { success, message } = await signup({
+        name,
+        email,
+        password,
+        phone,
+        houseNo,
+        street,
+        landmark,
+        city,
+        state,
+        pincode
+      });
+  
       if (success) {
         navigate("/");
       } else {
         setError(message || "Registration failed. Please try again.");
       }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6">

@@ -67,7 +67,7 @@ const Profile = () => {
       {/* Profile Header */}
       <div className="flex flex-col items-center mb-6 animate-fadeIn">
         <div className="w-24 h-24 rounded-full bg-yellow-400 text-red-700 flex items-center justify-center text-4xl font-bold shadow-inner">
-          {user.name?.charAt(0).toUpperCase()}
+          {user.Name?.charAt(0).toUpperCase()}
         </div>
         <h2 className="text-3xl font-bold text-red-600 mt-4">My Profile</h2>
       </div>

@@ -10,7 +10,7 @@ export const OrderProvider = ({ children }) => {
   const { showToast } = useToast();
   const [orders, setOrders] = useState([]);
 
-  // ✅ Fetch orders from backend
+  // ✅ Fetch orders
   const fetchOrders = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/orders/${user.CustomerID}`);
@@ -25,20 +25,23 @@ export const OrderProvider = ({ children }) => {
       showToast("Error loading orders", "error");
     }
   };
-  
 
   // ✅ Place order with EmailJS
   const placeOrder = (order) => {
     const newOrder = {
       ...order,
       id: Date.now(),
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toLocaleString("en-IN", {
+        dateStyle: "long",
+        timeStyle: "short"
+      }),
+      
     };
 
     const updatedOrders = [newOrder, ...orders];
     setOrders(updatedOrders);
 
-    // ✅ Email Notification
+    // ✅ Send email via EmailJS
     emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID,
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
@@ -49,13 +52,12 @@ export const OrderProvider = ({ children }) => {
         address: newOrder.address,
         total: newOrder.totalAmount,
         year: new Date().getFullYear(),
-        user_email: user?.email,
-        items: newOrder.items
-          .map((item) => `${item.name} x${item.quantity} - ₹${item.price * item.quantity}`)
-          .join(", "),
+        user_email: user?.Email, // ✅ double-check this is Email not email
+        items: newOrder.items,   // ✅ SEND RAW ARRAY
       },
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     )
+    
     .then(() => {
       console.log("✅ Email sent!");
     })
@@ -67,16 +69,14 @@ export const OrderProvider = ({ children }) => {
     return newOrder;
   };
 
-  // 🧠 Load orders when user logs in
   useEffect(() => {
     if (user?.CustomerID) {
-      fetchOrders(user.CustomerID);
+      fetchOrders();
     } else {
       setOrders([]);
     }
   }, [user]);
 
-  // ❌ Clear all orders (optional)
   const clearOrders = () => {
     setOrders([]);
     showToast("Order history cleared", "info");

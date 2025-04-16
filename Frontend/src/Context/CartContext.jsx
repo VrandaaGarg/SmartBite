@@ -1,4 +1,11 @@
-import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 
@@ -10,35 +17,40 @@ export const CartProvider = ({ children }) => {
 
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cartTrigger, setCartTrigger] = useState(0); // 🔁 new trigger state
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
 
-  const showSingleToast = useCallback((message, type) => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    pendingToastRef.current = { message, type };
-    toastTimeoutRef.current = setTimeout(() => {
-      if (pendingToastRef.current) {
-        showToast(pendingToastRef.current.message, pendingToastRef.current.type);
-        pendingToastRef.current = null;
-      }
-    }, 300);
-  }, [showToast]);
+  const showSingleToast = useCallback(
+    (message, type) => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      pendingToastRef.current = { message, type };
+      toastTimeoutRef.current = setTimeout(() => {
+        if (pendingToastRef.current) {
+          showToast(pendingToastRef.current.message, pendingToastRef.current.type);
+          pendingToastRef.current = null;
+        }
+      }, 300);
+    },
+    [showToast]
+  );
 
-  // 🔃 Fetch Cart on login
+  // 🔃 Fetch Cart
   const fetchCart = useCallback(async () => {
     if (!user?.CustomerID) return;
-
+    setLoading(true);
     try {
       const res = await fetch(`http://localhost:5000/api/cart/${user.CustomerID}`);
       const data = await res.json();
       const normalized = data.map(item => ({
-        id: item.DishID,
+        DishID: item.DishID, // 👈 important for remove/update
         quantity: item.Quantity,
         price: item.Price,
         name: item.Name,
         image: item.Image,
-        description: item.Description
+        description: item.Description,
       }));
+      
       
       setCart(normalized);
     } catch (err) {
@@ -49,10 +61,14 @@ export const CartProvider = ({ children }) => {
     }
   }, [user, showSingleToast]);
 
+  // 🧠 Watch for login & updates
   useEffect(() => {
-    if (user?.CustomerID) fetchCart();
-    else setCart([]);
-  }, [user, fetchCart]);
+    if (user?.CustomerID) {
+      fetchCart();
+    } else {
+      setCart([]);
+    }
+  }, [user, fetchCart, cartTrigger]); // 🔥 include cartTrigger
 
   // ➕ Add to Cart
   const addToCart = async (dish) => {
@@ -64,11 +80,13 @@ export const CartProvider = ({ children }) => {
           CustomerID: user.CustomerID,
           DishID: dish.DishID,
           Quantity: 1,
+          Amount: dish.Price * 1, // ✅ required by backend
         }),
       });
+  
       if (res.ok) {
         showSingleToast(`${dish.Name} added to cart`, "success");
-        fetchCart();
+        await fetchCart();
       } else {
         throw new Error("Failed to add to cart");
       }
@@ -77,8 +95,8 @@ export const CartProvider = ({ children }) => {
       showSingleToast("Error adding to cart", "error");
     }
   };
-
-  // 🔁 Update Quantity
+  
+  
   const updateQuantity = async (DishID, newQuantity) => {
     if (newQuantity <= 0) return removeFromCart(DishID);
 
@@ -93,7 +111,7 @@ export const CartProvider = ({ children }) => {
         }),
       });
       if (res.ok) {
-        fetchCart();
+        setCartTrigger((prev) => prev + 1);
       } else {
         throw new Error("Update failed");
       }
@@ -103,7 +121,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // ❌ Remove
   const removeFromCart = async (DishID) => {
     try {
       const res = await fetch(`http://localhost:5000/api/cart/remove`, {
@@ -114,35 +131,44 @@ export const CartProvider = ({ children }) => {
           DishID,
         }),
       });
+  
       if (res.ok) {
         showSingleToast("Item removed from cart", "info");
-        fetchCart();
+        fetchCart(); // ✅ refresh
+      } else {
+        throw new Error("Failed to remove item");
       }
     } catch (err) {
       console.error(err);
+      showSingleToast("Error removing item", "error");
     }
   };
+  
 
-  // 🧹 Clear Cart
   const clearCart = async () => {
     try {
-      await fetch(`http://localhost:5000/api/cart/clear/${user.CustomerID}`, {
+      const res = await fetch(`http://localhost:5000/api/cart/clear/${user.CustomerID}`, {
         method: "DELETE",
       });
-      showSingleToast("Cart cleared", "info");
-      fetchCart();
+  
+      if (res.ok) {
+        setCart([]); // ⬅️ immediately clear UI
+        showSingleToast("Cart cleared", "info");
+      } else {
+        throw new Error("Failed to clear cart");
+      }
     } catch (err) {
       console.error(err);
+      showSingleToast("Error clearing cart", "error");
     }
   };
-
+  
   return (
     <CartContext.Provider
-  value={{ cart, loading, addToCart, updateQuantity, removeFromCart, clearCart }}
->
-  {children}
-</CartContext.Provider>
-
+      value={{ cart, loading, addToCart, updateQuantity, removeFromCart, clearCart }}
+    >
+      {children}
+    </CartContext.Provider>
   );
 };
 

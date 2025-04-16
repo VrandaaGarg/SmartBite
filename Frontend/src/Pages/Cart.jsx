@@ -1,6 +1,6 @@
 // Cart.jsx
 import React, { useState, useEffect } from "react";
-import { useCart,loading } from "../Context/CartContext";
+import { useCart } from "../Context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaShoppingCart,
@@ -12,7 +12,7 @@ import {
 import { MdOutlineFastfood } from "react-icons/md";
 
 const Cart = () => {
-  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, clearCart, loading } = useCart();
   const navigate = useNavigate();
   const [animateItems, setAnimateItems] = useState(false);
   const [removingItem, setRemovingItem] = useState(null);
@@ -61,6 +61,15 @@ const Cart = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex justify-center items-center">
+        <p className="text-gray-500 text-lg animate-pulse">Loading your cart...</p>
+      </div>
+    );
+  }
+  
+
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 pb-20">
       <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left mb-2 md:mb-6 text-red-600">
@@ -73,9 +82,9 @@ const Cart = () => {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Cart Items List */}
         <div className="lg:w-2/3 space-y-4">
-          {cart.map((item, index) => (
-            <div
-              key={item.CartID || item.DishID}
+        {cart.map((item, index) => (
+  <div
+    key={`${item.DishID}-${index}`}  // ✅ guaranteed unique
               className={`bg-white rounded-xl shadow-md overflow-hidden flex flex-col sm:flex-row 
                 ${
                   animateItems

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useCart } from "../Context/CartContext";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useOrder } from "../Context/OrderContext";
+
 
 const Payment = () => {
   const { cart, clearCart } = useCart();
@@ -9,12 +11,17 @@ const Payment = () => {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [loading, setLoading] = useState(false);
+  const { placeOrder } = useOrder(); // get it from context
+
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const deliveryFee = subtotal > 0 ? 40 : 0;
   const tax = Math.round(subtotal * 0.05);
   const totalAmount = subtotal + deliveryFee + tax;
 
+  console.log(user)
+  console.log(cart)
+;
   const handlePlaceOrder = async () => {
     if (!user || cart.length === 0) return;
 
@@ -27,22 +34,37 @@ const Payment = () => {
           CustomerID: user.CustomerID,
           Discount: 0,
           items: cart.map((item) => ({
-            DishID: item.DishID,
+            DishID: item.DishID || item.id,
             Quantity: item.quantity,
-            Price: item.price, // not Amount, as backend uses Price
+            Price: item.price,
           })),
         }),
-        
       });
-
+      
       const data = await res.json();
+      console.log("data:",data);
 
       if (res.ok) {
+        const newOrder = {
+          id: data.orderId,
+          createdAt: new Date().toISOString(),
+          paymentMethod,
+          address: `${user.HouseNo}, ${user.Street}, ${user.Landmark}, ${user.City}, ${user.State} - ${user.Pincode}`,
+          totalAmount,
+          items: cart.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: parseFloat(item.price)  // ✅ this ensures price is a number
+          })),
+          
+        };
+        console.log("📦 Email items payload:", newOrder.items);
+
+      
+        placeOrder(newOrder); // 💥 this triggers emailjs
         clearCart();
         navigate("/order-success", { state: { orderId: data.orderId } });
-      } else {
-        alert(data.error || "Order failed.");
-      }
+      }      
     } catch (error) {
       console.error("Order Error:", error);
       alert("Something went wrong while placing your order.");

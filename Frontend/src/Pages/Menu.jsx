@@ -53,17 +53,32 @@ const Menu = () => {
       ? "veg"
       : "non-veg";
   };
-
-  const handleAddToCart = (dish) => {
+  const handleAddToCart = async (dish) => {
     if (!user) {
       showToast("Please login to add items to your cart", "error");
       navigate("/login");
       return;
     }
   
-    addToCart(dish);
-    showToast(`Added ${dish.Name} to cart`, "success");
+    try {
+      await fetch(`http://localhost:5000/api/cart`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          CustomerID: user.CustomerID,
+          DishID: dish.DishID,
+          Quantity: 1,
+          Amount: dish.Price,
+        })
+      });
+  
+      showToast(`Added ${dish.Name} to cart`, "success");
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      showToast("Failed to add item", "error");
+    }
   };
+  
   
 
   const filteredDishes = dishes.filter((dish) => {

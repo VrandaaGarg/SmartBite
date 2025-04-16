@@ -11,9 +11,9 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import { useState, useEffect } from "react";
-import { 
-  FaSignInAlt, FaUserPlus, FaShoppingCart, FaHome, 
-  FaInfoCircle, FaHeadset, FaUtensils, FaUserCircle, 
+import {
+  FaSignInAlt, FaUserPlus, FaShoppingCart, FaHome,
+  FaInfoCircle, FaHeadset, FaUtensils, FaUserCircle,
   FaHistory, FaSignOutAlt, FaListAlt, FaHamburger
 } from "react-icons/fa";
 import { useCart } from "../Context/CartContext";
@@ -32,12 +32,17 @@ function classNames(...classes) {
 export default function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { cart } = useCart();
+ 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  
+
   // Calculate total cart items
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const { cart } = useCart();
+  const cartItemCount = Array.isArray(cart)
+    ? cart.reduce((total, item) => total + (item.Quantity || item.quantity || 0), 0)
+    : 0;
+  
+
 
   // Handle navbar color change on scroll
   useEffect(() => {
@@ -54,20 +59,19 @@ export default function Navbar() {
   }, [location.pathname]);
 
   return (
-    <Disclosure 
-      as="nav" 
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-gradient-to-r from-red-700 to-red-600 shadow-lg" 
+    <Disclosure
+      as="nav"
+      className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
+          ? "bg-gradient-to-r from-red-700 to-red-600 shadow-lg"
           : "bg-gradient-to-r from-red-600 to-red-500"
-      }`}
+        }`}
     >
       {({ open, close }) => {
         // Keep local state in sync with headlessui's open state
         if (open !== menuOpen) {
           setMenuOpen(open);
         }
-        
+
         return (
           <>
             {/* Navbar Wrapper */}
@@ -75,8 +79,8 @@ export default function Navbar() {
               <div className="flex h-16 items-center justify-between">
                 {/* Left: Enhanced Brand Logo */}
                 <div className="flex items-center">
-                  <Link 
-                    to="/" 
+                  <Link
+                    to="/"
                     className="flex items-center hover:scale-105 transition-transform"
                     aria-label="SmartBite Home"
                   >
@@ -126,19 +130,21 @@ export default function Navbar() {
                     className="relative text-white hover:text-yellow-300 transition-colors"
                     aria-label="Shopping Cart"
                   >
-                    <FaShoppingCart className="text-xl" />
-                    {cartItemCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        {cartItemCount}
-                      </span>
-                    )}
+                   
+                      <FaShoppingCart className="text-xl" />
+                      {cartItemCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                          {cartItemCount}
+                        </span>
+                      )}
+                   
                   </Link>
-                  
+
                   {/* 👤 Mobile Avatar Dropdown */}
                   {user && (
                     <Menu as="div" className="relative md:hidden">
                       <MenuButton className="flex items-center justify-center h-9 w-9 bg-gradient-to-br from-yellow-300 to-yellow-500 text-black font-bold rounded-full shadow-md hover:shadow-lg transition-all">
-                        {user.name?.charAt(0).toUpperCase()}
+                        {user.Name?.charAt(0).toUpperCase()}
                       </MenuButton>
                       <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-xl ring-1 ring-black/10 focus:outline-none text-black z-50 py-1">
                         <MenuItem>
@@ -185,7 +191,7 @@ export default function Navbar() {
                   {user && (
                     <Menu as="div" className="relative hidden md:block">
                       <MenuButton className="flex items-center justify-center h-10 w-10 bg-gradient-to-br from-yellow-300 to-yellow-500 text-black font-bold rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105">
-                        {user.name?.charAt(0).toUpperCase()}
+                        {user.Name?.charAt(0).toUpperCase()}
                       </MenuButton>
                       <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-xl ring-1 ring-black/10 focus:outline-none text-black z-50 py-1">
                         <MenuItem>
@@ -244,31 +250,29 @@ export default function Navbar() {
                   key={item.name}
                   as={Link}
                   to={item.href}
-                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-all ${
-                    location.pathname === item.href
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-all ${location.pathname === item.href
                       ? "bg-yellow-400 text-black shadow-md"
                       : "hover:bg-red-600 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <item.icon /> {item.name}
                 </DisclosureButton>
               ))}
-              
+
               {/* Orders button for mobile */}
               {user && (
                 <DisclosureButton
                   as={Link}
                   to="/orders"
-                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-all ${
-                    location.pathname === "/orders"
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-all ${location.pathname === "/orders"
                       ? "bg-yellow-400 text-black shadow-md"
                       : "hover:bg-red-600 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <FaListAlt /> My Orders
                 </DisclosureButton>
               )}
-              
+
               {/* Mobile auth buttons */}
               {!user && (
                 <div className="flex flex-col space-y-2 pt-2">
@@ -288,7 +292,7 @@ export default function Navbar() {
                   </DisclosureButton>
                 </div>
               )}
-              
+
               {/* Logout button for mobile */}
               {user && (
                 <DisclosureButton

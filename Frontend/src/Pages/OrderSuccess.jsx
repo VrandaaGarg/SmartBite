@@ -1,18 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaArrowLeft, FaHome, FaReceipt, FaMapMarkerAlt, FaCreditCard } from "react-icons/fa";
+import { useAuth } from "../Context/AuthContext";
+
 
 const OrderSuccess = () => {
   const { state } = useLocation();
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   const [animateIn, setAnimateIn] = useState(false);
-  const order = state?.order;
+  const orderId = state?.orderId;
+const [order, setOrder] = useState(null);
+
 
   // Animation effect
   useEffect(() => {
+    if (!orderId) return;
+    
+    const fetchOrder = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/orders/${user.CustomerID}`);
+        const allOrders = await res.json();
+        const found = allOrders.find((o) => o.OrderID === orderId);
+        setOrder(found);
+      } catch (err) {
+        console.error("Error fetching order:", err);
+      }
+    };
+  
+    fetchOrder();
     const timer = setTimeout(() => setAnimateIn(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [orderId]);
+  
 
   // Estimated delivery time (for demo purposes)
   const estimatedDelivery = new Date();

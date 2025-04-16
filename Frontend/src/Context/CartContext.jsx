@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 
@@ -9,124 +9,140 @@ export const CartProvider = ({ children }) => {
   const { showToast } = useToast();
 
   const [cart, setCart] = useState([]);
-  const [cartLoaded, setCartLoaded] = useState(false);
-
-  // Improved toast management with global timeout ref
+  const [loading, setLoading] = useState(true);
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
 
-  // Single function to handle all toast messages with improved debouncing
   const showSingleToast = useCallback((message, type) => {
-    // Clear any pending toast timeouts
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = null;
-    }
-
-    // Store the intent to show a toast, but don't show immediately
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     pendingToastRef.current = { message, type };
-
-    // Use a single timeout to show the toast after all state updates
     toastTimeoutRef.current = setTimeout(() => {
       if (pendingToastRef.current) {
         showToast(pendingToastRef.current.message, pendingToastRef.current.type);
         pendingToastRef.current = null;
       }
-      toastTimeoutRef.current = null;
     }, 300);
   }, [showToast]);
 
-  // Load cart from localStorage
-  useEffect(() => {
-    if (user?.id) {
-      const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
-      setCart(userCart[user.id] || []);
-      setCartLoaded(true);
-    } else if (user === null) {
-      setCart([]);
+  // 🔃 Fetch Cart on login
+  const fetchCart = useCallback(async () => {
+    if (!user?.CustomerID) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/cart/${user.CustomerID}`);
+      const data = await res.json();
+      const normalized = data.map(item => ({
+        id: item.DishID,
+        quantity: item.Quantity,
+        price: item.Price,
+        name: item.Name,
+        image: item.Image,
+        description: item.Description
+      }));
+      
+      setCart(normalized);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      showSingleToast("Failed to load cart", "error");
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, showSingleToast]);
 
-  // Save cart to localStorage only after it's loaded
   useEffect(() => {
-    if (user?.id && cartLoaded) {
-      const userCart = JSON.parse(localStorage.getItem("user_cart")) || {};
-      userCart[user.id] = cart;
-      localStorage.setItem("user_cart", JSON.stringify(userCart));
-    }
-  }, [cart, user, cartLoaded]);
+    if (user?.CustomerID) fetchCart();
+    else setCart([]);
+  }, [user, fetchCart]);
 
-  // Clean up any pending toasts on unmount
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Add item to cart with single toast message
-  const addToCart = useCallback((item) => {
-    setCart(prevCart => {
-      // Check if item already exists
-      const exists = prevCart.find((x) => x.id === item.id);
-
-      if (exists) {
-        // Only show toast after state update is complete
-
-
-        // Return updated cart
-        return prevCart.map((x) =>
-          x.id === item.id ? { ...x, quantity: x.quantity + 1 } : x
-        );
+  // ➕ Add to Cart
+  const addToCart = async (dish) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          CustomerID: user.CustomerID,
+          DishID: dish.DishID,
+          Quantity: 1,
+        }),
+      });
+      if (res.ok) {
+        showSingleToast(`${dish.Name} added to cart`, "success");
+        fetchCart();
       } else {
-        // Only show toast after state update is complete
-
-
-        // Return updated cart
-        return [...prevCart, { ...item, quantity: 1 }];
+        throw new Error("Failed to add to cart");
       }
-    });
-  }, [showSingleToast]);
-
-  // Update quantity
-  const updateQuantity = useCallback((id, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
-      return;
+    } catch (err) {
+      console.error(err);
+      showSingleToast("Error adding to cart", "error");
     }
+  };
 
-    setCart(prevCart =>
-      prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
-  }, []);
+  // 🔁 Update Quantity
+  const updateQuantity = async (DishID, newQuantity) => {
+    if (newQuantity <= 0) return removeFromCart(DishID);
 
-  // Remove from cart with single toast message
-  const removeFromCart = useCallback((id) => {
-    setCart(prevCart => {
-      const itemToRemove = prevCart.find((item) => item.id === id);
-
-      if (itemToRemove) {
-        // Show toast only once after the operation is complete
-        showSingleToast(`${itemToRemove.name} removed from cart`, "info");
+    try {
+      const res = await fetch(`http://localhost:5000/api/cart/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          CustomerID: user.CustomerID,
+          DishID,
+          Quantity: newQuantity,
+        }),
+      });
+      if (res.ok) {
+        fetchCart();
+      } else {
+        throw new Error("Update failed");
       }
+    } catch (err) {
+      console.error(err);
+      showSingleToast("Error updating quantity", "error");
+    }
+  };
 
-      return prevCart.filter((item) => item.id !== id);
-    });
-  }, [showSingleToast]);
+  // ❌ Remove
+  const removeFromCart = async (DishID) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/cart/remove`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          CustomerID: user.CustomerID,
+          DishID,
+        }),
+      });
+      if (res.ok) {
+        showSingleToast("Item removed from cart", "info");
+        fetchCart();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  // Clear cart with single toast message
-  const clearCart = useCallback(() => {
-    setCart([]);
-    showSingleToast("Cart cleared", "info");
-  }, [showSingleToast]);
+  // 🧹 Clear Cart
+  const clearCart = async () => {
+    try {
+      await fetch(`http://localhost:5000/api/cart/clear/${user.CustomerID}`, {
+        method: "DELETE",
+      });
+      showSingleToast("Cart cleared", "info");
+      fetchCart();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart }}
-    >
-      {children}
-    </CartContext.Provider>
+  value={{ cart, loading, addToCart, updateQuantity, removeFromCart, clearCart }}
+>
+  {children}
+</CartContext.Provider>
+
   );
 };
 

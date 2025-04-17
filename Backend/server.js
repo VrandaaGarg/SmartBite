@@ -8,11 +8,13 @@ const customerRoutes = require('./routes/customerRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const authRoutes = require('./routes/authRoutes');
+const menuRoutes = require('./routes/menuRoutes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/menus', menuRoutes);
 app.use('/api/dishes', dishRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/customers', customerRoutes);

@@ -13,7 +13,7 @@ export const OrderProvider = ({ children }) => {
   // ✅ Fetch orders
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${user.CustomerID}`);
+      const res = await fetch(`http://localhost:5000/api/orders/customer/${user.CustomerID}`);
       const data = await res.json();
       if (res.ok) {
         setOrders(data);
@@ -82,8 +82,22 @@ export const OrderProvider = ({ children }) => {
     showToast("Order history cleared", "info");
   };
 
+  const refreshReviewInOrders = (dishId, reviewData) => {
+    setOrders((prev) =>
+      prev.map((order) => ({
+        ...order,
+        items: order.items.map((item) =>
+          item.DishID === dishId
+            ? { ...item, review: reviewData }
+            : item
+        ),
+      }))
+    );
+  };
+  
+
   return (
-    <OrderContext.Provider value={{ orders, fetchOrders, placeOrder, clearOrders }}>
+    <OrderContext.Provider value={{ orders,refreshReviewInOrders, fetchOrders, placeOrder, clearOrders }}>
       {children}
     </OrderContext.Provider>
   );

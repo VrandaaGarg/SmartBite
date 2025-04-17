@@ -6,6 +6,8 @@ import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-i
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
+import MenuModal from "../Components/MenuModal";
+
 
 const Menu = () => {
   const [selectedMenuId, setSelectedMenuId] = useState(null);
@@ -18,6 +20,9 @@ const Menu = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();// 👈 your user context
+  const [selectedDish, setSelectedDish] = useState(null);
+
+
 
   useEffect(() => {
     fetch("http://localhost:5000/api/dishes")
@@ -29,7 +34,7 @@ const Menu = () => {
       });
   }, []);
 
-  
+
   // Animation effect when component mounts or filters change
   useEffect(() => {
     setAnimateIn(false);
@@ -37,43 +42,30 @@ const Menu = () => {
     return () => clearTimeout(timer);
   }, [selectedMenuId, filter, searchQuery]);
 
-  const getVegOrNonVeg = (dish) => {
-    const vegKeywords = [
-      "Paneer",
-      "Dal",
-      "Veg",
-      "Chaas",
-      "Lassi",
-      "Rasmalai",
-      "Gulab",
-    ];
-    return vegKeywords.some((word) =>
-      dish.Name.toLowerCase().includes(word.toLowerCase())
-    )
-      ? "veg"
-      : "non-veg";
+  const getVegOrNonVeg = (dish) => dish.Type; // Use directly from DB
+
+
+
+  const handleAddToCart = (dish) => {
+    if (!user) {
+      showToast("Please login to add items to your cart", "error");
+      navigate("/login");
+      return;
+    }
+
+    addToCart(dish); // ✅ use the context's method
   };
-  
-
-const handleAddToCart = (dish) => {
-  if (!user) {
-    showToast("Please login to add items to your cart", "error");
-    navigate("/login");
-    return;
-  }
-
-  addToCart(dish); // ✅ use the context's method
-};
 
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.MenuID === selectedMenuId : true;
     const matchType =
-      filter.type === "all" || getVegOrNonVeg(dish) === filter.type;
+    filter.type === "all" || dish.Type === filter.type;
+  
     const matchPrice = dish.Price <= filter.maxPrice;
-    const matchSearch = searchQuery === "" || 
-      dish.Name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchSearch = searchQuery === "" ||
+      dish.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dish.Description.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchMenu && matchType && matchPrice && matchSearch;
+    return matchMenu && matchType && matchPrice && matchSearch;
   });
 
   const priceRanges = [
@@ -84,7 +76,7 @@ const handleAddToCart = (dish) => {
     { label: "< ₹400", max: 400 },
   ];
 
-  const currentCategoryName = selectedMenuId 
+  const currentCategoryName = selectedMenuId
     ? menus.find(menu => menu.id === selectedMenuId)?.name
     : "All Items";
 
@@ -125,25 +117,23 @@ const handleAddToCart = (dish) => {
         <div className="flex gap-2 min-w-max">
           <button
             onClick={() => setSelectedMenuId(null)}
-            className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
-              selectedMenuId === null
-                ? "bg-red-600 text-white border-red-600 shadow-md"
-                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-            } transition-all duration-200`}
+            className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${selectedMenuId === null
+              ? "bg-red-600 text-white border-red-600 shadow-md"
+              : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              } transition-all duration-200`}
           >
             <FaUtensils className="text-lg" />
             All Categories
           </button>
-          
+
           {menus.map((menu) => (
             <button
               key={menu.id}
               onClick={() => setSelectedMenuId(menu.id === selectedMenuId ? null : menu.id)}
-              className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
-                selectedMenuId === menu.id
-                  ? "bg-red-600 text-white border-red-600 shadow-md"
-                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-              } transition-all duration-200`}
+              className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${selectedMenuId === menu.id
+                ? "bg-red-600 text-white border-red-600 shadow-md"
+                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                } transition-all duration-200`}
             >
               <span className="text-lg">{menu.icon}</span>
               {menu.name}
@@ -162,40 +152,37 @@ const handleAddToCart = (dish) => {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "all" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                    filter.type === "all"
-                      ? "bg-red-100 text-red-800 font-medium"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "all"
+                    ? "bg-red-100 text-red-800 font-medium"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   <FaUtensils className={filter.type === "all" ? "text-red-600" : "text-gray-500"} />
                   All
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                    filter.type === "veg"
-                      ? "bg-green-100 text-green-800 font-medium"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "veg"
+                    ? "bg-green-100 text-green-800 font-medium"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   <FaLeaf className={filter.type === "veg" ? "text-green-600" : "text-gray-500"} />
                   Vegetarian
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "non-veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                    filter.type === "non-veg"
-                      ? "bg-yellow-100 text-yellow-800 font-medium"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "non-veg"
+                    ? "bg-yellow-100 text-yellow-800 font-medium"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   <FaDrumstickBite className={filter.type === "non-veg" ? "text-yellow-600" : "text-gray-500"} />
                   Non-Vegetarian
                 </button>
               </div>
             </div>
-            
+
             {/* Price Filter */}
             <div className="flex-1">
               <h3 className="text-sm font-semibold mb-2 text-gray-700">Price Range</h3>
@@ -204,11 +191,10 @@ const handleAddToCart = (dish) => {
                   <button
                     key={range.label}
                     onClick={() => setFilter((f) => ({ ...f, maxPrice: range.max }))}
-                    className={`px-4 py-2 rounded-full transition-all ${
-                      filter.maxPrice === range.max
-                        ? "bg-red-100 text-red-800 font-medium"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`px-4 py-2 rounded-full transition-all ${filter.maxPrice === range.max
+                      ? "bg-red-100 text-red-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
                     {range.label}
                   </button>
@@ -222,7 +208,7 @@ const handleAddToCart = (dish) => {
       {/* Empty State */}
       {filteredDishes.length === 0 && (
         <div className="text-center py-12">
-          <img 
+          <img
             src="https://cdn-icons-png.flaticon.com/512/1021/1021262.png"
             alt="No results"
             className="w-24 h-24 mx-auto mb-4 opacity-30"
@@ -247,9 +233,9 @@ const handleAddToCart = (dish) => {
         {filteredDishes.map((dish) => (
           <div
             key={dish.DishID}
-            className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${
-              animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            } group hover:-translate-y-1`}
+
+            className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              } group hover:-translate-y-1`}
             style={{
               transitionDelay: `${Math.random() * 0.3}s`,
             }}
@@ -258,16 +244,14 @@ const handleAddToCart = (dish) => {
               <img
                 src={dish.Image}
                 alt={dish.Name}
+                onClick={() => setSelectedDish(dish)} // 🟢 opens modal on click
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <span
-                className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${
-                  getVegOrNonVeg(dish) === "veg"
-                    ? "bg-green-500 text-white"
-                    : "bg-yellow-500 text-white"
-                }`}
+                className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${dish.Type === "veg" ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                  }`}
               >
-                {getVegOrNonVeg(dish) === "veg" ? (
+                {dish.Type === "veg" ? (
                   <span className="flex items-center gap-1">
                     <FaLeaf /> Veg
                   </span>
@@ -277,13 +261,15 @@ const handleAddToCart = (dish) => {
                   </span>
                 )}
               </span>
+
             </div>
             <div className="p-5">
               <h3 className="font-bold text-lg text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
                 {dish.Name}
               </h3>
+
               <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[40px]">
-                {dish.description}
+                {dish.Description}
               </p>
               <div className="flex justify-between items-center">
                 <span className="text-xl font-bold text-red-600">₹{dish.Price}</span>
@@ -298,6 +284,10 @@ const handleAddToCart = (dish) => {
           </div>
         ))}
       </div>
+
+      {selectedDish && (
+        <MenuModal dish={selectedDish} onClose={() => setSelectedDish(null)} />
+      )}
 
       {/* Pagination - Placeholder for future implementation */}
       {filteredDishes.length > 0 && (

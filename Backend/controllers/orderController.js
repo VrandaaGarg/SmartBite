@@ -37,42 +37,60 @@ const getOrdersByCustomer = (req, res) => {
     WHERE oi.OrderID = ?
   `;
 
+  const reviewSql = `
+    SELECT * FROM REVIEW
+    WHERE CustomerID = ?
+  `;
+
   db.query(orderSql, [customerId], (err, orders) => {
     if (err) return res.status(500).json({ error: "Failed to fetch orders" });
 
-    const ordersWithItems = [];
+    // First get all reviews by this customer
+    db.query(reviewSql, [customerId], (reviewErr, reviews) => {
+      if (reviewErr) return res.status(500).json({ error: "Failed to fetch reviews" });
 
-    const fetchItems = (index) => {
-      if (index >= orders.length) {
-        return res.json(ordersWithItems);
-      }
+      const ordersWithItems = [];
 
-      const order = orders[index];
+      const fetchItems = (index) => {
+        if (index >= orders.length) {
+          return res.json(ordersWithItems);
+        }
 
-      db.query(orderItemsSql, [order.OrderID], (err2, items) => {
-        if (err2) return res.status(500).json({ error: "Failed to fetch order items" });
+        const order = orders[index];
 
-        ordersWithItems.push({
-          ...order,
-          items: items.map(item => ({
+        db.query(orderItemsSql, [order.OrderID], (err2, items) => {
+          if (err2) return res.status(500).json({ error: "Failed to fetch order items" });
+
+          // Map reviews to each dish in the order
+          const enrichedItems = items.map((item) => ({
             id: item.OrderItemID,
             DishID: item.DishID,
             name: item.Name,
             image: item.Image,
             description: item.Description,
             quantity: item.Quantity,
-            price: item.Price
-          })),
-          createdAt: order.CreatedAt // ✅ FIXED: Use proper field from DB
+            price: item.Price,
+            review: reviews.find(r => r.DishID === item.DishID) || null
+          }));
+
+          ordersWithItems.push({
+            ...order,
+            items: enrichedItems,
+            createdAt: order.CreatedAt
+          });
+
+          fetchItems(index + 1);
         });
+      };
 
-        fetchItems(index + 1);
-      });
-    };
-
-    fetchItems(0);
+      fetchItems(0);
+    });
   });
 };
+
+
+
+
 
 
 module.exports = {

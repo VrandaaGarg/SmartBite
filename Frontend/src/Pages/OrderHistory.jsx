@@ -10,12 +10,15 @@ import {
   FaClock,
   FaRupeeSign,
 } from "react-icons/fa";
+import ReviewModal from "../Components/ReviewModal";
+import { FaStar } from "react-icons/fa"; // ⭐ Add this line
 
 const OrderHistory = () => {
   const { orders, fetchOrders } = useOrder();
   const { user } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
-
+  const [reviewModal, setReviewModal] = useState(null);
+  console.log(orders)
   useEffect(() => {
     if (user?.CustomerID) {
       fetchOrders(user.CustomerID);
@@ -59,6 +62,14 @@ const OrderHistory = () => {
         <h1 className="text-3xl md:text-4xl font-bold text-red-600 mb-2">Your Orders</h1>
         <p className="text-gray-600">Keep track of all your delicious meals</p>
       </div>
+        {/* ⬇️ Place this outside orders.map() so it only renders once */}
+  {reviewModal && (
+  <ReviewModal
+    dishId={reviewModal.dishId}
+    existingReview={reviewModal.existingReview}
+    onClose={() => setReviewModal(null)}
+  />
+)}
 
       <div className="space-y-6">
         {orders.map((order, index) => {
@@ -93,13 +104,14 @@ const OrderHistory = () => {
                   </span>
                 </div>
               </div>
-
+  
               <div className="p-6">
                 {/* Order Items */}
                 <div className="mb-4">
                   <h4 className="text-gray-700 font-medium mb-2 flex items-center gap-2">
                     <FaShoppingBag className="text-gray-500" /> Order Details
                   </h4>
+                
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {order.items?.map((item, i) => (
                       <div key={i} className="flex gap-3 p-3 rounded-lg hover:bg-gray-50">
@@ -114,10 +126,51 @@ const OrderHistory = () => {
                             <span>Qty: {item.quantity}</span>
                             <span>₹{item.price * item.quantity}</span>
                           </div>
+
+                          {/* ⬇️ ADD the Write Review button here ⬇️ */}
+                          {item.review ? (
+                            <div className="text-sm text-gray-600 mt-2">
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <span key={i}>
+                                    <FaStar
+                                      className={`text-sm ${i < item.review.Rating ? "text-yellow-400" : "text-gray-300"}`}
+                                    />
+                                  </span>
+                                ))}
+                              </div>
+                              <p className="text-xs text-gray-500 italic mt-1">"{item.review.Comment}"</p>
+
+                              <button
+                                className="text-xs text-red-600 underline mt-1"
+                                onClick={() =>
+                                  setReviewModal({
+                                    dishId: item.DishID || item.id,
+                                    existingReview: item.review || null, // Pass review if exists
+                                  })
+                                }
+                              >
+                                Edit Review
+                              </button>
+
+                            </div>
+                          ) : (
+                            <button
+                              className="text-xs text-red-600 underline mt-1"
+                              onClick={() => setReviewModal({ dishId: item.DishID || item.id })}
+                            >
+                              Write a Review
+                            </button>
+                          )}
+
                         </div>
                       </div>
                     ))}
+
                   </div>
+
+
+
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">

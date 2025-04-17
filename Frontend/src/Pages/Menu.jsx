@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import { dishes } from "../Data/dishes";
-import { menus } from "../Data/menus";
 import { useCart } from "../Context/CartContext";
 import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-icons/fa";
 import { useAuth } from "../Context/AuthContext";
@@ -21,6 +19,18 @@ const Menu = () => {
   const navigate = useNavigate();
   const { user } = useAuth();// 👈 your user context
   const [selectedDish, setSelectedDish] = useState(null);
+  const [menus, setMenus] = useState([]);
+
+useEffect(() => {
+  fetch("http://localhost:5000/api/menus")
+    .then((res) => res.json())
+    .then((data) => setMenus(data))
+    .catch((err) => {
+      console.error("Error fetching menus:", err);
+      showToast("Failed to load menu categories!", "error");
+    });
+}, []);
+
 
 
 
@@ -76,9 +86,11 @@ const Menu = () => {
     { label: "< ₹400", max: 400 },
   ];
 
+  console.log("menu",menus)
   const currentCategoryName = selectedMenuId
-    ? menus.find(menu => menu.id === selectedMenuId)?.name
-    : "All Items";
+  ? menus.find(menu => menu.MenuID === selectedMenuId)?.Name
+  : "All Items";
+
 
   return (
     <div className="py-8 px-4 max-w-7xl mx-auto">
@@ -127,18 +139,20 @@ const Menu = () => {
           </button>
 
           {menus.map((menu) => (
-            <button
-              key={menu.id}
-              onClick={() => setSelectedMenuId(menu.id === selectedMenuId ? null : menu.id)}
-              className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${selectedMenuId === menu.id
-                ? "bg-red-600 text-white border-red-600 shadow-md"
-                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                } transition-all duration-200`}
-            >
-              <span className="text-lg">{menu.icon}</span>
-              {menu.name}
-            </button>
-          ))}
+  <button
+    key={menu.MenuID}
+    onClick={() => setSelectedMenuId(menu.MenuID === selectedMenuId ? null : menu.MenuID)}
+    className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
+      selectedMenuId === menu.MenuID
+        ? "bg-red-600 text-white border-red-600 shadow-md"
+        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+    } transition-all duration-200`}
+  >
+    <span className="text-lg">{menu.Icon}</span>
+    {menu.Name}
+  </button>
+))}
+
         </div>
       </div>
 

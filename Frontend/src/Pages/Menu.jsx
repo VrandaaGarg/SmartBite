@@ -54,8 +54,6 @@ useEffect(() => {
 
   const getVegOrNonVeg = (dish) => dish.Type; // Use directly from DB
 
-
-
   const handleAddToCart = (dish) => {
     if (!user) {
       showToast("Please login to add items to your cart", "error");
@@ -86,7 +84,6 @@ useEffect(() => {
     { label: "< ₹400", max: 400 },
   ];
 
-  console.log("menu",menus)
   const currentCategoryName = selectedMenuId
   ? menus.find(menu => menu.MenuID === selectedMenuId)?.Name
   : "All Items";

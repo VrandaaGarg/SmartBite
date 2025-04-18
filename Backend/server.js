@@ -9,6 +9,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const authRoutes = require('./routes/authRoutes');
 const menuRoutes = require('./routes/menuRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 
 const app = express();
 app.use(cors());
@@ -21,6 +23,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

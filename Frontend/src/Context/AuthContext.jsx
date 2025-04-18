@@ -50,12 +50,12 @@ export const AuthProvider = ({ children }) => {
           Pincode: pincode
         }),
       });
-  
+
       const data = await res.json();
-  
+
       if (res.status === 201) {
         showSingleToast("Account created successfully", "success");
-  
+
         // ✅ Auto-login using same credentials
         return await login(email, password);
       } else {
@@ -67,7 +67,6 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: err.message };
     }
   };
-  
 
   // 🔐 Login via backend
   const login = async (email, password) => {
@@ -80,9 +79,20 @@ export const AuthProvider = ({ children }) => {
 
       const data = await res.json();
       if (res.ok) {
-        const fullUser = { ...data.user, token: data.token };
+        const isAdmin = data.user.Email === "admin@smartbite.com"; // 👈 set admin condition
+
+        const fullUser = {
+          ...data.user,
+          token: data.token,
+          isAdmin: data.user.IsAdmin === 1, // normalize here
+        };
+        
+        // check that data.user has `isAdmin` from the backend
         setUser(fullUser);
         localStorage.setItem("current_user", JSON.stringify(fullUser));
+        
+        localStorage.setItem("current_user", JSON.stringify(fullUser));
+
         showSingleToast("Logged in successfully", "success");
         return { success: true };
       } else {

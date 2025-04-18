@@ -6,9 +6,10 @@ const About = () => {
   const [animatedStats, setAnimatedStats] = useState(false);
   const [visibleSection, setVisibleSection] = useState("");
 
+  // const URL_Location = https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=0d7e0434effa4ea3825e16245d95ba24;
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=26.843073,75.565823`;
 
-  
+
 
   // Statistics to be animated
   const stats = [
@@ -51,16 +52,16 @@ const About = () => {
       image: "https://st2.depositphotos.com/5653638/11534/i/450/depositphotos_115345470-stock-photo-indian-male-chef-holding-fresh.jpg"
     },
     {
-      name: "Priya Patel",
+      name: "Vranda Garg",
       role: "Founder & CEO",
-      bio: "Priya founded SmartBite with a vision to bring homestyle Indian food to everyone's doorstep with just a few taps.",
-      image: "https://randomuser.me/api/portraits/women/44.jpg"
+      bio: "Vranda founded SmartBite with a vision to bring homestyle Indian food to everyone's doorstep with just a few taps.",
+      image: "/vranda.jpeg"
     },
     {
-      name: "Arjun Singh",
-      role: "Operations Manager",
-      bio: "Arjun ensures that every order is processed efficiently and delivered with SmartBite's signature quality and care.",
-      image: "https://randomuser.me/api/portraits/men/67.jpg"
+      name: "Ayush Sharma ",
+      role: "Co- Founder & Operations Head",
+      bio: "Ayush ensures that every order is processed efficiently and delivered with SmartBite's signature quality and care.",
+      image: "/ayush.jpeg"
     }
   ];
 
@@ -209,8 +210,8 @@ const About = () => {
               <div
                 key={index}
                 className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all transform ${visibleSection === "values-section"
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-8 "
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-8 "
                   }`}
                 style={{ transitionDelay: `${index * 150}ms`, transitionDuration: '800ms' }}
               >
@@ -240,8 +241,8 @@ const About = () => {
               <div
                 key={index}
                 className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-1000 ${visibleSection === "team-section"
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-8 opacity-0"
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-8 opacity-0"
                   }`}
                 style={{ transitionDelay: `${index * 200}ms` }}
               >
@@ -310,17 +311,17 @@ const About = () => {
             </div>
 
             <div className={`transform transition-all duration-1000 ${visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"}`}>
-  <div className="relative w-full h-80 rounded-xl overflow-hidden shadow-lg">
-    {/* Map Embed */}
-    <iframe
-      title="Manipal University Jaipur Map"
-      src="https://www.openstreetmap.org/export/embed.html?bbox=75.560823%2C26.840073%2C75.570823%2C26.846073&layer=mapnik&marker=26.843073%2C75.565823"
-      className="w-full h-full"
-      style={{ border: "none" }}
-      allowFullScreen
-    ></iframe>
-  </div>
-</div>
+              <div className="relative w-full h-80 rounded-xl overflow-hidden shadow-lg">
+                {/* Map Embed */}
+                <iframe
+                  title="Manipal University Jaipur Map"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=75.560823%2C26.840073%2C75.570823%2C26.846073&layer=mapnik&marker=26.843073%2C75.565823"
+                  className="w-full h-full"
+                  style={{ border: "none" }}
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
 
           </div>
         </div>

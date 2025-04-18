@@ -18,7 +18,7 @@ const MenuModal = ({ dish, onClose }) => {
 
     if (dish?.DishID) fetchReviews();
   }, [dish]);
-
+  
   const averageRating =
     reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + r.Rating, 0) / reviews.length).toFixed(1)
@@ -66,9 +66,8 @@ const MenuModal = ({ dish, onClose }) => {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
                     key={star}
-                    className={`text-lg ${
-                      star <= Math.round(averageRating) ? "text-yellow-400" : "text-gray-300"
-                    }`}
+                    className={`text-lg ${star <= Math.round(averageRating) ? "text-yellow-400" : "text-gray-300"
+                      }`}
                   />
                 ))}
               </div>
@@ -81,26 +80,38 @@ const MenuModal = ({ dish, onClose }) => {
             <h3 className="text-md font-semibold text-gray-800 mb-2">Recent Reviews</h3>
             {reviews.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-auto pr-2 custom-scrollbar">
-                {reviews.slice(0, 5).map((rev) => (
-                  <li key={rev.ReviewID} className="border p-3 rounded-md bg-gray-50">
-                    <div className="flex items-center gap-1 mb-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FaStar
-                          key={star}
-                          className={`text-sm ${
-                            star <= rev.Rating ? "text-yellow-400" : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-sm text-gray-700">{rev.Comment}</p>
-                    <p className="text-xs text-gray-400 mt-1">- {rev.CustomerName}</p>
-                  </li>
-                ))}
+                {reviews.slice(0, 5).map((rev) => {
+                  const reviewDate = new Date(rev.CreatedAt).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  });
+
+                  return (
+                    <li key={rev.ReviewID} className="border p-3 rounded-md bg-gray-50">
+                      <div className="flex items-center gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FaStar
+                            key={star}
+                            className={`text-sm ${star <= rev.Rating ? "text-yellow-400" : "text-gray-300"
+                              }`}
+                          />
+                        ))}
+                      </div>
+
+                      <p className="text-sm text-gray-700">{rev.Comment}</p>
+
+                      <div className="text-xs text-gray-400 mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <span>- {rev.CustomerName}</span>
+                        <span> {reviewDate}</span>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-sm text-gray-500">No reviews yet.</p>
             )}
+
           </div>
         </div>
       </motion.div>

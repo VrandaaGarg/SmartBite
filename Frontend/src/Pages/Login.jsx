@@ -29,8 +29,14 @@ const Login = () => {
       const { success, message } = await login(form.email, form.password);
 
       if (success) {
-        navigate("/");
-      } else {
+        const storedUser = JSON.parse(localStorage.getItem("current_user"));
+        if (storedUser?.isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      }
+       else {
         setError(message || "Invalid credentials");
       }
     } catch (err) {

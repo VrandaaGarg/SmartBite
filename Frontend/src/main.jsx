@@ -20,18 +20,25 @@ import CustomerService from "./Pages/CustomerService";
 import { OrderProvider } from "./Context/OrderContext";
 import OrderHistory from "./Pages/OrderHistory";
 
+import AdminDashboard from "./Admin/AdminDashboard";
+import AddDish from "./Admin/AddDish";
+import ManageDishes from "./Admin/ManageDishes";
+import ViewCustomers from "./Admin/ViewCustomers";
+import ViewOrders from "./Admin/ViewOrders";
+import ProtectedAdminRoute from "./Context/ProtectedAdminRoute";
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-    <ToastProvider>
-      <AuthProvider>
-       
+      <ToastProvider>
+        <AuthProvider>
+
           <CartProvider>
             <OrderProvider>
               <Routes>
+                {/* 🌐 Public/Protected User Routes */}
                 <Route path="/" element={<App />}>
                   <Route index element={<Home />} />
                   <Route path="/menu" element={<Menu />} />
@@ -55,16 +62,34 @@ root.render(
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/support" element={<CustomerService />} />
-                  {/* 🆕 Payment Flow */}
                   <Route path="/payment" element={<Payment />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/orders" element={<OrderHistory />} />
                 </Route>
+
+                {/* ✅ Admin Routes (Separate from "/" layout) */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedAdminRoute>
+                      <App />
+                    </ProtectedAdminRoute>
+                  }
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="add-dish" element={<AddDish />} />
+                  <Route path="manage-dishes" element={<ManageDishes />} />
+                  <Route path="orders" element={<ViewOrders />} />
+                  <Route path="customers" element={<ViewCustomers />} />
+                </Route>
+
+
               </Routes>
+
             </OrderProvider>
           </CartProvider>
-        
-      </AuthProvider>
+
+        </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
   </React.StrictMode>

@@ -2,6 +2,7 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
 const JWT_SECRET = process.env.JWT_SECRET || 'smartbite-secret';
 
 const registerUser = async (req, res) => {
@@ -46,12 +47,15 @@ const loginUser = (req, res) => {
     }
 
     const token = jwt.sign(
-      { CustomerID: user.CustomerID, Email: user.Email },
+      {
+        CustomerID: user.CustomerID,
+        Email: user.Email,
+        IsAdmin: user.IsAdmin, // ✅ INCLUDED
+      },
       JWT_SECRET,
       { expiresIn: "2d" }
     );
 
-    // Don't send password back
     const { Password: _, ...userWithoutPassword } = user;
 
     res.json({
@@ -61,5 +65,6 @@ const loginUser = (req, res) => {
     });
   });
 };
+
 
 module.exports = { registerUser, loginUser };

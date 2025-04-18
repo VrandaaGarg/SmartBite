@@ -6,6 +6,10 @@ const About = () => {
   const [animatedStats, setAnimatedStats] = useState(false);
   const [visibleSection, setVisibleSection] = useState("");
 
+  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=26.843073,75.565823`;
+
+  
+
   // Statistics to be animated
   const stats = [
     { id: 'customers', label: 'Happy Customers', value: 5000, icon: FaUsers, color: 'bg-yellow-100 text-yellow-600' },
@@ -44,7 +48,7 @@ const About = () => {
       name: "Rahul Sharma",
       role: "Executive Chef",
       bio: "With 15 years of experience in Indian cuisine, Chef Rahul brings authentic flavors and innovative techniques to every dish.",
-      image: "https://randomuser.me/api/portraits/men/32.jpg"
+      image: "https://st2.depositphotos.com/5653638/11534/i/450/depositphotos_115345470-stock-photo-indian-male-chef-holding-fresh.jpg"
     },
     {
       name: "Priya Patel",
@@ -73,7 +77,7 @@ const About = () => {
         if (entry.isIntersecting) {
           const sectionId = entry.target.getAttribute('id');
           setVisibleSection(sectionId);
-          
+
           if (sectionId === 'stats-section') {
             setAnimatedStats(true);
           }
@@ -82,7 +86,7 @@ const About = () => {
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    
+
     const sections = document.querySelectorAll('.observe-section');
     sections.forEach(section => {
       observer.observe(section);
@@ -105,7 +109,7 @@ const About = () => {
           <div className="absolute top-1/2 -right-12 w-48 h-48 rounded-full bg-red-800"></div>
           <div className="absolute -bottom-12 left-1/4 w-36 h-36 rounded-full bg-yellow-300"></div>
         </div>
-        
+
         <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Our Story</h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto text-red-100">
@@ -118,9 +122,8 @@ const About = () => {
       <section id="story-section" className="observe-section py-16 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className={`transform transition-all duration-1000 ${
-              visibleSection === "story-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
-            }`}>
+            <div className={`transform transition-all duration-1000 ${visibleSection === "story-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+              }`}>
               <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Story</span>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">
                 From Passion to Plate
@@ -142,19 +145,18 @@ const About = () => {
                 </p>
               </div>
             </div>
-            <div className={`grid grid-cols-2 gap-4 transform transition-all duration-1000 ${
-              visibleSection === "story-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
-            }`}>
+            <div className={`grid grid-cols-2 gap-4 transform transition-all duration-1000 ${visibleSection === "story-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
+              }`}>
               <div className="space-y-4">
-                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40" alt="Food preparation" 
+                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40" alt="Food preparation"
                   className="rounded-lg shadow-lg" />
-                <img src="https://images.unsplash.com/photo-1534939561126-855b8675edd7" alt="Fresh ingredients" 
+                <img src="https://images.unsplash.com/photo-1534939561126-855b8675edd7" alt="Fresh ingredients"
                   className="rounded-lg shadow-lg transform translate-y-8" />
               </div>
               <div className="space-y-4 transform translate-y-12">
-                <img src="https://images.unsplash.com/photo-1613545325278-f24b0cae1224" alt="Indian curry" 
+                <img src="https://images.unsplash.com/photo-1613545325278-f24b0cae1224" alt="Indian curry"
                   className="rounded-lg shadow-lg" />
-                <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8" alt="Chef cooking" 
+                <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8" alt="Chef cooking"
                   className="rounded-lg shadow-lg" />
               </div>
             </div>
@@ -175,7 +177,7 @@ const About = () => {
                 <h3 className="text-4xl font-bold text-gray-800">
                   {animatedStats ? (
                     <>
-                      {stat.id === 'rating' ? stat.value : "0"}
+                      {stat.value}
                       {stat.suffix || ''}
                     </>
                   ) : (
@@ -184,6 +186,7 @@ const About = () => {
                     </>
                   )}
                 </h3>
+
                 <p className="text-gray-600 mt-2">{stat.label}</p>
               </div>
             ))}
@@ -200,16 +203,15 @@ const About = () => {
               What We Stand For
             </h2>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div 
-                key={index} 
-                className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all transform ${
-                  visibleSection === "values-section" 
-                    ? "translate-y-0 opacity-100" 
-                    : "translate-y-8 opacity-0"
-                }`}
+              <div
+                key={index}
+                className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all transform ${visibleSection === "values-section"
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-8 "
+                  }`}
                 style={{ transitionDelay: `${index * 150}ms`, transitionDuration: '800ms' }}
               >
                 <div className="bg-red-50 text-red-600 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -232,20 +234,19 @@ const About = () => {
               Meet the Faces Behind SmartBite
             </h2>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {team.map((member, index) => (
-              <div 
-                key={index} 
-                className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-1000 ${
-                  visibleSection === "team-section" 
-                    ? "translate-y-0 opacity-100" 
+              <div
+                key={index}
+                className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-1000 ${visibleSection === "team-section"
+                    ? "translate-y-0 opacity-100"
                     : "translate-y-8 opacity-0"
-                }`}
+                  }`}
                 style={{ transitionDelay: `${index * 200}ms` }}
               >
-                <img 
-                  src={member.image} 
+                <img
+                  src={member.image}
                   alt={member.name}
                   className="w-full h-64 object-cover object-center"
                 />
@@ -264,9 +265,8 @@ const About = () => {
       <section id="locations-section" className="observe-section py-16 md:py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className={`transform transition-all duration-1000 ${
-              visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
-            }`}>
+            <div className={`transform transition-all duration-1000 ${visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+              }`}>
               <span className="bg-red-100 text-red-600 rounded-full px-4 py-1 text-sm font-medium">Our Kitchens</span>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">
                 Where the Magic Happens
@@ -275,7 +275,7 @@ const About = () => {
                 SmartBite operates from multiple cloud kitchens across the city, strategically located to ensure
                 fast delivery and maximum freshness. Each kitchen follows the same rigorous standards and recipes.
               </p>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="bg-red-50 p-2 rounded-full">
@@ -286,7 +286,7 @@ const About = () => {
                     <p className="text-gray-600">52, Food Street, Flavor Avenue, Central City</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <div className="bg-red-50 p-2 rounded-full">
                     <FaMapMarkerAlt className="text-red-600" />
@@ -296,7 +296,7 @@ const About = () => {
                     <p className="text-gray-600">24, Spice Road, Northern District</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <div className="bg-red-50 p-2 rounded-full">
                     <FaMapMarkerAlt className="text-red-600" />
@@ -308,20 +308,20 @@ const About = () => {
                 </div>
               </div>
             </div>
-            
-            <div className={`transform transition-all duration-1000 ${
-              visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
-            }`}>
-              {/* Placeholder for map - in a real app, this would be a map component */}
-              <div className="bg-gray-200 w-full h-80 rounded-xl overflow-hidden shadow-lg relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-gray-500 font-medium">Interactive Map</p>
-                    <p className="text-sm text-gray-400">Find our nearest location</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+            <div className={`transform transition-all duration-1000 ${visibleSection === "locations-section" ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"}`}>
+  <div className="relative w-full h-80 rounded-xl overflow-hidden shadow-lg">
+    {/* Map Embed */}
+    <iframe
+      title="Manipal University Jaipur Map"
+      src="https://www.openstreetmap.org/export/embed.html?bbox=75.560823%2C26.840073%2C75.570823%2C26.846073&layer=mapnik&marker=26.843073%2C75.565823"
+      className="w-full h-full"
+      style={{ border: "none" }}
+      allowFullScreen
+    ></iframe>
+  </div>
+</div>
+
           </div>
         </div>
       </section>

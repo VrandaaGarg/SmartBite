@@ -36,7 +36,7 @@ const Login = () => {
           navigate("/");
         }
       }
-       else {
+      else {
         setError(message || "Invalid credentials");
       }
     } catch (err) {
@@ -48,9 +48,8 @@ const Login = () => {
 
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6 md:px-8">
-      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${
-        animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-      }`}>
+      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}>
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to continue to SmartBite</p>
@@ -110,15 +109,20 @@ const Login = () => {
               >
                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
+             
             </div>
+            <p className="text-sm text-right mt-3">
+                <a href="/forgot-password" className="text-red-600 hover:underline text-right">
+                  Forgot your password?
+                </a>
+              </p>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
-              isLoading ? 'opacity-80 cursor-not-allowed' : ''
-            }`}
+            className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
+              }`}
           >
             {isLoading ? (
               <>
@@ -135,6 +139,7 @@ const Login = () => {
             )}
           </button>
         </form>
+
 
         {/* Sign up link */}
         <div className="mt-8 text-center text-sm text-gray-600">

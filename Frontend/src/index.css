@@ -15,3 +15,31 @@
     }
   }
 }
+
+/* Custom Red Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb; /* light gray */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #dc2626; /* red-600 */
+  border-radius: 10px;
+  border: 1px solid #f9fafb;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #b91c1c; /* red-700 on hover */
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #dc2626 #f9fafb;
+}
+

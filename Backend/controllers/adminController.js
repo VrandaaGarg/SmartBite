@@ -141,6 +141,67 @@ const getAllCustomers = async (req, res) => {
   }
 };
 
+// 🟢 Promote a user to admin only vrandacodz@gmail.com can do this
+const promoteToAdmin = async (req, res) => {
+  const { emailToPromote } = req.body;
+  const currentEmail = req.user?.Email;
+
+  if (currentEmail !== "vrandacodz@gmail.com") {
+    return res.status(403).json({ error: "Only the main admin can promote users." });
+  }
+
+  try {
+    const [result] = await db.promise().query(
+      "UPDATE CUSTOMER SET IsAdmin = TRUE WHERE Email = ?",
+      [emailToPromote]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.status(200).json({ message: `${emailToPromote} is now an admin.` });
+  } catch (err) {
+    console.error("Promotion error:", err);
+    res.status(500).json({ error: "Server error promoting user." });
+  }
+};
+
+// 🟢 Demote a user from admin
+const demoteAdmin = async (req, res) => {
+  const { emailToPromote } = req.body;
+  const currentEmail = req.user?.Email;
+
+  // Only main admin can demote others
+  if (currentEmail !== "vrandacodz@gmail.com") {
+    return res.status(403).json({ error: "Only the main admin can demote users." });
+  }
+
+  // Protect main admin from being demoted
+  if (emailToPromote === "vrandacodz@gmail.com") {
+    return res.status(403).json({ error: "You cannot demote the main admin." });
+  }
+
+  try {
+    const [result] = await db.promise().query(
+      "UPDATE CUSTOMER SET IsAdmin = FALSE WHERE Email = ?",
+      [emailToPromote]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.status(200).json({ message: `${emailToPromote} is no longer an admin.` });
+  } catch (err) {
+    console.error("Demotion error:", err);
+    res.status(500).json({ error: "Server error demoting user." });
+  }
+};
+
+
+
+
 module.exports = {
   getAllDishes,
   addDish,
@@ -148,4 +209,6 @@ module.exports = {
   deleteDish,
   getAllOrders,
   getAllCustomers,
+  promoteToAdmin,
+  demoteAdmin
 };

@@ -1,8 +1,18 @@
 import React, { useState } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { FaUserEdit, FaSave, FaSignOutAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
+import {
+  FaUserEdit,
+  FaSave,
+  FaSignOutAlt,
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaUserCircle,
+} from "react-icons/fa";
 import { useToast } from "../Context/ToastContext";
+import axios from "axios";
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -18,7 +28,7 @@ const Profile = () => {
     landmark: user?.Landmark || "",
     city: user?.City || "",
     state: user?.State || "",
-    pincode: user?.Pincode || ""
+    pincode: user?.Pincode || "",
   });
 
   const fullAddress = `${formData.houseNo}, ${formData.street}${formData.landmark ? ", " + formData.landmark : ""}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
@@ -36,7 +46,7 @@ const Profile = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedUser = {
       ...user,
       Name: formData.name,
@@ -46,13 +56,23 @@ const Profile = () => {
       Landmark: formData.landmark,
       City: formData.city,
       State: formData.state,
-      Pincode: formData.pincode
+      Pincode: formData.pincode,
     };
-
+  
+    // ⏱ Update frontend immediately
     localStorage.setItem("current_user", JSON.stringify(updatedUser));
-    showToast("Profile updated successfully", "success");
-    setIsEditing(false);
+  
+    // 🔁 Async sync to backend
+    try {
+      await axios.put("http://localhost:5000/api/auth/update-profile", updatedUser);
+      showToast("Profile updated successfully", "success");
+      setIsEditing(false);
+    } catch (err) {
+      showToast("Failed to sync with backend", "error");
+      console.error("Backend sync failed:", err);
+    }
   };
+  
 
   if (!user) {
     return (
@@ -63,138 +83,100 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 mt-10 bg-white rounded-xl shadow-md transition-all duration-300 ease-in-out">
+    <motion.div
+      className="max-w-2xl mx-auto p-8 mt-10 bg-white rounded-2xl shadow-xl"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       {/* Profile Header */}
-      <div className="flex flex-col items-center mb-6 animate-fadeIn">
+      <div className="flex flex-col items-center mb-8">
         <div className="w-24 h-24 rounded-full bg-yellow-400 text-red-700 flex items-center justify-center text-4xl font-bold shadow-inner">
           {user.Name?.charAt(0).toUpperCase()}
         </div>
-        <h2 className="text-3xl font-bold text-red-600 mt-4">My Profile</h2>
+        <h2 className="text-3xl font-extrabold text-red-600 mt-4 flex items-center gap-2">
+          <FaUserCircle /> My Profile
+        </h2>
       </div>
 
-      {/* Form Fields */}
-      <div className="space-y-4">
-        {/* Name */}
+      {/* Profile Form */}
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Name
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
             name="name"
             value={formData.name}
             disabled={!isEditing}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded border ${isEditing
-                ? "bg-white border-gray-300"
-                : "bg-gray-100 text-gray-500"
-              }`}
+            className={`w-full px-4 py-2 rounded-lg border ${isEditing ? "bg-white" : "bg-gray-100 text-gray-500"}`}
           />
         </div>
 
-        {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            value={user.Email}
-
-            disabled
-            className="w-full px-4 py-2 rounded bg-gray-100 text-gray-500 border"
-          />
-        </div>
-
-        {/* Phone */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Phone
-          </label>
-          <input
-            name="phone"
-            value={formData.phone}
-            disabled={!isEditing}
-            onChange={handleChange}
-            className={`w-full px-4 py-2 rounded border ${isEditing
-                ? "bg-white border-gray-300"
-                : "bg-gray-100 text-gray-500"
-              }`}
-          />
-        </div>
-
-        {/* Address */}
-        {/* Address Fields (Editable) */}
-        {isEditing && (
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <div className="flex items-center gap-2">
+            <FaEnvelope className="text-gray-500" />
             <input
-              name="houseNo"
-              value={formData.houseNo}
-              onChange={handleChange}
-              placeholder="House No"
-              className="px-4 py-2 rounded border border-gray-300"
-            />
-            <input
-              name="street"
-              value={formData.street}
-              onChange={handleChange}
-              placeholder="Street"
-              className="px-4 py-2 rounded border border-gray-300"
-            />
-            <input
-              name="landmark"
-              value={formData.landmark}
-              onChange={handleChange}
-              placeholder="Landmark"
-              className="px-4 py-2 rounded border border-gray-300"
-            />
-            <input
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              placeholder="City"
-              className="px-4 py-2 rounded border border-gray-300"
-            />
-            <input
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              placeholder="State"
-              className="px-4 py-2 rounded border border-gray-300"
-            />
-            <input
-              name="pincode"
-              value={formData.pincode}
-              onChange={handleChange}
-              placeholder="Pincode"
-              className="px-4 py-2 rounded border border-gray-300"
+              value={user.Email}
+              disabled
+              className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-500 border"
             />
           </div>
-        )}
+        </div>
 
-        {/* Full Address Display (When Not Editing) */}
-        {!isEditing && (
-          <textarea
-            value={fullAddress}
-            disabled
-            rows="3"
-            className="w-full px-4 py-2 rounded bg-gray-100 text-gray-500 border mt-2"
-          />
-        )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <div className="flex items-center gap-2">
+            <FaPhone className="text-gray-500" />
+            <input
+              name="phone"
+              value={formData.phone}
+              disabled={!isEditing}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 rounded-lg border ${isEditing ? "bg-white" : "bg-gray-100 text-gray-500"}`}
+            />
+          </div>
+        </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          {isEditing ? (
+            <div className="grid grid-cols-2 gap-4">
+              {["houseNo", "street", "landmark", "city", "state", "pincode"].map((field, index) => (
+                <input
+                  key={index}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  className="px-4 py-2 rounded-lg border border-gray-300"
+                />
+              ))}
+            </div>
+          ) : (
+            <textarea
+              value={fullAddress}
+              disabled
+              rows="3"
+              className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-500 border"
+            />
+          )}
+        </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 animate-fadeIn">
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10">
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded transition"
+            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg shadow-sm"
           >
             <FaUserEdit /> Edit Profile
           </button>
         ) : (
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded transition"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-sm"
           >
             <FaSave /> Save Changes
           </button>
@@ -202,12 +184,12 @@ const Profile = () => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition"
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow-sm"
         >
           <FaSignOutAlt /> Logout
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

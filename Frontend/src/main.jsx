@@ -26,6 +26,8 @@ import ManageDishes from "./Admin/ManageDishes";
 import ViewCustomers from "./Admin/ViewCustomers";
 import ViewOrders from "./Admin/ViewOrders";
 import ProtectedAdminRoute from "./Context/ProtectedAdminRoute";
+import ForgotPassword from "./Pages/ForgetPassword";
+import ResetPassword from "./Pages/ResetPassword";
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -65,6 +67,9 @@ root.render(
                   <Route path="/payment" element={<Payment />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/orders" element={<OrderHistory />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+
                 </Route>
 
                 {/* ✅ Admin Routes (Separate from "/" layout) */}

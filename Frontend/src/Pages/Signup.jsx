@@ -489,12 +489,16 @@ const Signup = () => {
         </form>
         
         {/* Already have an account */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link to="/login" className="font-medium text-red-600 hover:text-red-700 transition-colors flex items-center justify-center gap-1 mt-2">
-            <FaSignInAlt /> Sign in to your account
-          </Link>
-        </div>
+<div className="mt-8 text-center text-sm text-gray-600">
+  Already have an account?{" "}
+  <Link
+    to="/login"
+    className="font-medium text-red-600 hover:text-red-700 hover:underline transition-colors"
+  >
+    Sign in
+  </Link>
+</div>
+
       </div>
     </div>
   );

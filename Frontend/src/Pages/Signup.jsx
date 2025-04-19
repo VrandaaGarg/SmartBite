@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { 
-  FaEye, FaEyeSlash, FaUser, FaPhone, FaMapMarkerAlt, 
-  FaCity, FaMapPin, FaEnvelope, FaLock, FaHome, FaSignInAlt 
+import {
+  FaEye, FaEyeSlash, FaUser, FaPhone, FaMapMarkerAlt,
+  FaCity, FaMapPin, FaEnvelope, FaLock, FaHome, FaSignInAlt
 } from "react-icons/fa";
 
 const Signup = () => {
@@ -55,7 +55,7 @@ const Signup = () => {
 
     const messages = ["Weak", "Fair", "Good", "Strong"];
     const colors = ["bg-red-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
-    
+
     setPasswordStrength({
       score,
       message: messages[score - 1] || "",
@@ -72,17 +72,17 @@ const Signup = () => {
       setError("Please fill in all required fields");
       return false;
     }
-    
+
     if (!form.email.includes('@')) {
       setError("Please enter a valid email address");
       return false;
     }
-    
+
     if (form.phone.length < 10) {
       setError("Please enter a valid phone number");
       return false;
     }
-    
+
     setError("");
     return true;
   };
@@ -92,17 +92,17 @@ const Signup = () => {
       setError("Please choose a password");
       return false;
     }
-    
+
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return false;
     }
-    
+
     if (passwordStrength.score < 2) {
       setError("Please choose a stronger password");
       return false;
     }
-    
+
     setError("");
     return true;
   };
@@ -121,14 +121,14 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep2()) return;
-  
+
     setIsLoading(true);
     try {
       const {
         name, email, password, phone,
         houseNo, street, landmark, city, state, pincode
       } = form;
-  
+
       const { success, message } = await signup({
         name,
         email,
@@ -141,7 +141,7 @@ const Signup = () => {
         state,
         pincode
       });
-  
+
       if (success) {
         navigate("/");
       } else {
@@ -153,29 +153,26 @@ const Signup = () => {
       setIsLoading(false);
     }
   };
-  
+
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6">
-      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${
-        animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-      }`}>
+      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-red-600 mb-2">Create Your Account</h1>
           <p className="text-gray-600">Join the SmartBite family and enjoy delicious food</p>
-          
+
           {/* Steps Indicator */}
           <div className="mt-8 flex justify-center">
             <div className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-              }`}>
+              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+                }`}>
                 1
               </div>
               <div className={`w-12 h-1 ${step >= 2 ? 'bg-red-600' : 'bg-gray-200'}`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-              }`}>
+              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+                }`}>
                 2
               </div>
             </div>
@@ -185,13 +182,13 @@ const Signup = () => {
             <span>Security</span>
           </div>
         </div>
-        
+
         {error && (
           <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 animate-shake">
             <p className="text-sm">{error}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {step === 1 && (
             <>
@@ -216,7 +213,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Phone */}
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
@@ -237,7 +234,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Email */}
                 <div className="md:col-span-2">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -259,7 +256,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* House No & Street */}
                 <div>
                   <label htmlFor="houseNo" className="block text-sm font-medium text-gray-700 mb-1">
@@ -280,7 +277,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
                     Street/Area*
@@ -300,7 +297,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Landmark */}
                 <div>
                   <label htmlFor="landmark" className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +312,7 @@ const Signup = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 {/* City */}
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
@@ -336,7 +333,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* State */}
                 <div>
                   <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
@@ -352,7 +349,7 @@ const Signup = () => {
                     required
                   />
                 </div>
-                
+
                 {/* Pincode */}
                 <div>
                   <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">
@@ -374,7 +371,7 @@ const Signup = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -386,7 +383,7 @@ const Signup = () => {
               </div>
             </>
           )}
-          
+
           {step === 2 && (
             <>
               {/* Password with strength meter */}
@@ -417,13 +414,13 @@ const Signup = () => {
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
-                
+
                 {/* Password strength meter */}
                 {form.password && (
                   <div className="mt-2">
                     <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${passwordStrength.color} transition-all duration-300`} 
+                      <div
+                        className={`h-full ${passwordStrength.color} transition-all duration-300`}
                         style={{ width: `${passwordStrength.score * 25}%` }}
                       ></div>
                     </div>
@@ -432,12 +429,12 @@ const Signup = () => {
                     </p>
                   </div>
                 )}
-                
+
                 <p className="text-xs text-gray-500 mt-2">
                   Use at least 8 characters with uppercase letters, numbers, and symbols for a strong password.
                 </p>
               </div>
-              
+
               <div className="pt-4">
                 <div className="flex items-center">
                   <input
@@ -452,7 +449,7 @@ const Signup = () => {
                   </label>
                 </div>
               </div>
-              
+
               <div className="flex justify-between pt-4">
                 <button
                   type="button"
@@ -461,13 +458,12 @@ const Signup = () => {
                 >
                   <span>←</span> Back
                 </button>
-                
+
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition flex items-center gap-2 ${
-                    isLoading ? 'opacity-80 cursor-not-allowed' : ''
-                  }`}
+                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition flex items-center gap-2 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
+                    }`}
                 >
                   {isLoading ? (
                     <>
@@ -487,17 +483,17 @@ const Signup = () => {
             </>
           )}
         </form>
-        
+
         {/* Already have an account */}
-<div className="mt-8 text-center text-sm text-gray-600">
-  Already have an account?{" "}
-  <Link
-    to="/login"
-    className="font-medium text-red-600 hover:text-red-700 hover:underline transition-colors"
-  >
-    Sign in
-  </Link>
-</div>
+        <div className="mt-8 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-red-600 hover:text-red-700 hover:underline transition-colors"
+          >
+            Sign in
+          </Link>
+        </div>
 
       </div>
     </div>

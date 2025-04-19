@@ -15,15 +15,20 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    // Show initial loading toast
+    const toastId = showToast("Sending reset mail...", "loading");
+  
     try {
       const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
-      showToast(res.data.message, "success");
+  
+      showToast(res.data.message, "success", toastId); // replace loading toast
       setEmail("");
     } catch (err) {
-      showToast(err.response?.data?.error || "Something went wrong", "error");
+      showToast(err.response?.data?.error || "Something went wrong", "error", toastId); // replace loading with error
     }
   };
-
+  
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6 md:px-8">
       <motion.div

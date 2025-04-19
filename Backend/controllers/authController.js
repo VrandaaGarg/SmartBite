@@ -162,9 +162,54 @@ const resetPassword = async (req, res) => {
   });
 };
 
+//Update Profile
+const updateProfile = async (req, res) => {
+  const {
+    Email,
+    Name,
+    Phone,
+    HouseNo,
+    Street,
+    Landmark,
+    City,
+    State,
+    Pincode
+  } = req.body;
+
+  if (!Email) {
+    return res.status(400).json({ error: "Email is required for updating profile." });
+  }
+
+  try {
+    const [result] = await db.promise().query(
+      `UPDATE CUSTOMER
+       SET Name = ?, Phone = ?, HouseNo = ?, Street = ?, Landmark = ?, City = ?, State = ?, Pincode = ?
+       WHERE Email = ?`,
+      [Name, Phone, HouseNo, Street, Landmark, City, State, Pincode, Email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Fetch updated user data
+    const [updatedUser] = await db.promise().query(
+      `SELECT * FROM CUSTOMER WHERE Email = ?`,
+      [Email]
+    );
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      updatedUser: updatedUser[0],
+    });
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ error: "Failed to update user profile" });
+  }
+};
 
 
 module.exports = {
   registerUser, loginUser, forgotPassword,
-  resetPassword
+  resetPassword,updateProfile
 };

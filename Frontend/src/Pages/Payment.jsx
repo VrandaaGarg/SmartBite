@@ -46,7 +46,7 @@ const Payment = () => {
 
       if (res.ok) {
         const newOrder = {
-          id: data.orderId,
+          OrderID: data.orderId,
           createdAt: new Date().toISOString(),
           paymentMethod,
           address: `${user.HouseNo}, ${user.Street}, ${user.Landmark}, ${user.City}, ${user.State} - ${user.Pincode}`,
@@ -63,7 +63,7 @@ const Payment = () => {
       
         placeOrder(newOrder); // 💥 this triggers emailjs
         clearCart();
-        navigate("/order-success", { state: { orderId: data.orderId } });
+        navigate("/order-success", { state: { order: newOrder } });
       }      
     } catch (error) {
       console.error("Order Error:", error);

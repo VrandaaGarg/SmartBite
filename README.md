@@ -100,7 +100,7 @@ cd smartbite
 ### 2. Backend Setup (Node + MySQL)
 
 ```bash
-cd backend
+cd Backend
 npm install
 ```
 
@@ -117,7 +117,7 @@ JWT_SECRET=smartbite-secret
 Then run:
 
 ```bash
-npm run dev
+node server.js
 ```
 
 ---
@@ -130,6 +130,14 @@ npm install
 npm run dev
 ```
 
+Create a `.env` file:
+
+```env
+VITE_EMAILJS_SERVICE_ID=your-EMAILJS-ID
+VITE_EMAILJS_TEMPLATE_ID=Template-ID
+VITE_EMAILJS_PUBLIC_KEY=EMAILJS-key
+```
+
 ---
 
 ## 🧪 Demo Credentials
@@ -138,7 +146,7 @@ npm run dev
 |-------------|--------------------------|------------|
 | Customer    | testuser@gmail.com       | 123456     |
 | Admin       | admin@gmail.com          | admin123   |
-| Super Admin | **vrandacodz@gmail.com** | anypass    |
+| Super Admin | **vrandacodz@gmail.com** |   ------   |
 
 ---
 
@@ -155,7 +163,7 @@ npm run dev
 ## 🧑‍🍳 Created With Love By
 
 **Vranda Garg**  
-GitHub: [@vrandacodz](https://github.com/VrandaaGarg)
+GitHub: [@VrandaaGarg](https://github.com/VrandaaGarg)
 
 > Full-stack Dev 🍔 | Hackathon Enthusiast 💻 
 

@@ -24,7 +24,7 @@ Built using **ReactJS**, **Tailwind CSS**, **Framer Motion**, **MySQL**, and **N
 |                             |                                   | ![orders](./Frontend/src/assets/all-orders.png) | ![orders](./Frontend/src/assets/all-orders.png) |
 | 🍽️ **Manage Dishes**        | ❌ No Access                     | ✅ Full Control                                  | ✅ Full Control                        |
 |                             |                                   | ![add dish](./Frontend/src/assets/add-dish.png) | ![add dish](./Frontend/src/assets/add-dish.png) |
-|                             |                                   | ![manage dish](./Frontend/src/assets/dropdowns/manage-dish.png) | ![manage dish](./Frontend/src/assets/manage-dish.png) |
+|                             |                                   | ![manage dish](./Frontend/src/assets/manage-dish.png) | ![manage dish](./Frontend/src/assets/manage-dish.png) |
 | 👥 **View Customers & Promote / Demote Admins**        | ❌ No Access                     | ✅ View-Only Access                 | ✅ Full Access                         |
 |                             |                                   | ![admin customers](./Frontend/src/assets/admin-customers.png) | ![super admin customers](./Frontend/src/assets/super-admin-customers.png) |
 | 🎛️ **Admin Dashboard**     | ❌ Hidden                        | ✅ Access Granted                   | ✅ Access + Admin Management Tools     |

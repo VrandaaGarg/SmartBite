@@ -1,4 +1,4 @@
-# 🍽️ SmartBite – Your Personal Restaurant Ordering Web App
+# 🍔 SmartBite – Your Personal Restaurant Ordering Website
 
 **SmartBite** is a full-stack restaurant food ordering system tailored for a **single restaurant owner**. From browsing dishes to placing orders, from managing dishes to viewing customers, it handles it all — with an intuitive UI and a smooth, animated experience.
 
@@ -8,11 +8,9 @@ Built using **ReactJS**, **Tailwind CSS**, **Framer Motion**, **MySQL**, and **N
 
 ## 📸 Project Preview
 
-> Add the following images inside `/assets/` folder
-
 | Home Page | Cart | Admin Dashboard |
 |-----------|------|------------------|
-| ![Home](./assets/home.png) | ![Cart](./assets/cart.png) | ![Admin](./assets/admin.png) |
+| ![Home](./Frontend/src/assets/home.png) | ![Cart](./Frontend/src/assets/cart.png) | ![Admin](./Frontend/src/assets/admin.png) |
 
 ---
 

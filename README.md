@@ -8,11 +8,33 @@ Built using **ReactJS**, **Tailwind CSS**, **Framer Motion**, **MySQL**, and **N
 
 ## 📸 Project Preview
 
-| Home Page | Cart | Admin Dashboard |
-|-----------|------|------------------|
-| ![Home](./Frontend/src/assets/home.png) | ![Cart](./Frontend/src/assets/cart.png) | ![Admin](./Frontend/src/assets/admin.png) |
+
+![Home](./Frontend/src/assets/home.png) 
 
 ---
+
+## 👥 Role-Based Access Comparison
+
+| Feature / View              | 👤 User                          | 🛠️ Admin                             | 👑 Super Admin                         |
+|-----------------------------|----------------------------------|-------------------------------------|----------------------------------------|
+| 🔐 **Access Level**         | Regular User                    | Privileged Admin                   | Top-level Control                      |
+|                             | ✅ Profile Dropdown              | ✅ Profile Dropdown                     | ✅ Profile Dropdown                  |
+|                             | ![User Dropdown](./Frontend/src/assets/user-dropdown.png) | ![Admin Dropdown](./Frontend/src/assets/admin-dropdown.png) | ![Super Dropdown](./Frontend/src/assets/admin-dropdown.png) |
+| 📦 **View All Orders**       | ❌ Not Accessible                | ✅ Access to All Orders with Filters            | ✅ Full Order Access with Filters      |
+|                             |                                   | ![orders](./Frontend/src/assets/all-orders.png) | ![orders](./Frontend/src/assets/all-orders.png) |
+| 🍽️ **Manage Dishes**        | ❌ No Access                     | ✅ Full Control                                  | ✅ Full Control                        |
+|                             |                                   | ![add dish](./Frontend/src/assets/add-dish.png) | ![add dish](./Frontend/src/assets/add-dish.png) |
+|                             |                                   | ![manage dish](./Frontend/src/assets/dropdowns/manage-dish.png) | ![manage dish](./Frontend/src/assets/manage-dish.png) |
+| 👥 **View Customers & Promote / Demote Admins**        | ❌ No Access                     | ✅ View-Only Access                 | ✅ Full Access                         |
+|                             |                                   | ![admin customers](./Frontend/src/assets/admin-customers.png) | ![super admin customers](./Frontend/src/assets/super-admin-customers.png) |
+| 🎛️ **Admin Dashboard**     | ❌ Hidden                        | ✅ Access Granted                   | ✅ Access + Admin Management Tools     |
+
+
+## Admin & Super Admin Dashboard        
+ ![SuperAdmin](./Frontend/src/assets/admin.png) 
+---
+
+## 📸 Visual Feature Comparison
 
 ## 🚀 Features
 

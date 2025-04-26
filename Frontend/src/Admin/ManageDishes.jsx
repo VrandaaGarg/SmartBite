@@ -21,7 +21,7 @@ const ManageDishes = () => {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = dishes.filter(dish => 
+      const filtered = dishes.filter(dish =>
         dish.Name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredDishes(filtered);
@@ -102,11 +102,13 @@ const ManageDishes = () => {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-8">
+        
+
         <button
           onClick={() => navigate(-1)}
-          className="absolute right-5 md:right-8 top-5 md:top-8 flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition rounded-lg shadow-md"
+          className="absolute top-2 md:top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-2 md:px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
         >
-          <IoArrowBack size={18} /> Back
+          <IoArrowBack /> <span className="hidden md:block">Back</span>
         </button>
       </div>
 
@@ -156,9 +158,9 @@ const ManageDishes = () => {
                   whileHover={{ backgroundColor: "rgba(253, 230, 138, 0.1)" }}
                 >
                   <td className="px-4 py-3">
-                    <img 
-                      src={dish.Image} 
-                      alt={dish.Name} 
+                    <img
+                      src={dish.Image}
+                      alt={dish.Name}
                       className="w-16 h-16 object-cover rounded-lg shadow-sm"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -168,9 +170,8 @@ const ManageDishes = () => {
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-800">{dish.Name}</td>
                   <td className="px-4 py-3 capitalize">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {dish.Type === 'veg' ? '🌱 Veg' : '🍗 Non-Veg'}
                     </span>
                   </td>
@@ -199,7 +200,7 @@ const ManageDishes = () => {
           </table>
         </div>
       )}
-      
+
       {/* Mobile View for smaller screens */}
       <div className="md:hidden mt-4 space-y-4">
         {filteredDishes.map((dish, idx) => (
@@ -211,10 +212,10 @@ const ManageDishes = () => {
             transition={{ delay: idx * 0.05 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <img 
-                src={dish.Image} 
-                alt={dish.Name} 
-                className="w-14 h-14 object-cover rounded-lg" 
+              <img
+                src={dish.Image}
+                alt={dish.Name}
+                className="w-14 h-14 object-cover rounded-lg"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://via.placeholder.com/400x300?text=Image+Error';
@@ -226,9 +227,8 @@ const ManageDishes = () => {
               </div>
             </div>
             <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
                 {dish.Type === 'veg' ? '🌱 Veg' : '🍗 Non-Veg'}
               </span>
               <div className="flex gap-2">
@@ -319,7 +319,7 @@ const ManageDishes = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
@@ -331,7 +331,7 @@ const ManageDishes = () => {
                       placeholder="Paste image URL here"
                     />
                   </div>
-                  
+
                   {/* Image Preview */}
                   <div className="mt-2">
                     <p className="text-xs text-gray-500 mb-2">Image Preview:</p>
@@ -380,7 +380,7 @@ const ManageDishes = () => {
             >
               <h3 className="text-xl font-bold text-gray-800 mb-2">Delete Dish</h3>
               <p className="text-gray-600 mb-6">Are you sure you want to delete this dish? This action cannot be undone.</p>
-              
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setDeletingId(null)}

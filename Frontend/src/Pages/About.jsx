@@ -6,7 +6,6 @@ const About = () => {
   const [animatedStats, setAnimatedStats] = useState(false);
   const [visibleSection, setVisibleSection] = useState("");
 
-
   // Statistics to be animated
   const stats = [
     { id: 'customers', label: 'Happy Customers', value: 5500, icon: FaUsers, color: 'bg-yellow-100 text-yellow-600' },

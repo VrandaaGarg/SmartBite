@@ -6,6 +6,7 @@ import emailjs from "@emailjs/browser";
 const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { user } = useAuth();
   const { showToast } = useToast();
   const [orders, setOrders] = useState([]);
@@ -13,7 +14,7 @@ export const OrderProvider = ({ children }) => {
   // ✅ Fetch orders
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`http://localhost:5500/api/orders/customer/${user.CustomerID}`);
+      const res = await fetch(`${API_URL}/api/orders/customer/${user.CustomerID}`);
       const data = await res.json();
       if (res.ok) {
         setOrders(data);

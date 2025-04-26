@@ -5,6 +5,7 @@ import { useToast } from "../Context/ToastContext";
 import axios from "axios";
 
 const ForgotPassword = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [email, setEmail] = useState("");
   const [animate, setAnimate] = useState(false);
   const { showToast } = useToast();
@@ -20,7 +21,7 @@ const ForgotPassword = () => {
     const toastId = showToast("Sending reset mail...", "loading");
   
     try {
-      const res = await axios.post("http://localhost:5500/api/auth/forgot-password", { email });
+      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
   
       showToast(res.data.message, "success", toastId); // replace loading toast
       setEmail("");

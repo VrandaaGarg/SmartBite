@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
 
 const ViewCustomers = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [customers, setCustomers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedEmail, setSelectedEmail] = useState(null);
@@ -19,7 +20,7 @@ const ViewCustomers = () => {
 
     const handleAdminChange = async (email, makeAdmin = true) => {
         try {
-            const res = await fetch(`http://localhost:5500/api/admin/${makeAdmin ? "promote" : "demote"}`, {
+            const res = await fetch(`${API_URL}/api/admin/${makeAdmin ? "promote" : "demote"}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

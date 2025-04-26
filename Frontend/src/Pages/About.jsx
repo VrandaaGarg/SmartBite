@@ -7,9 +7,6 @@ const About = () => {
   const [visibleSection, setVisibleSection] = useState("");
 
   // const URL_Location = https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=0d7e0434effa4ea3825e16245d95ba24;
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=26.843073,75.565823`;
-
-
 
   // Statistics to be animated
   const stats = [

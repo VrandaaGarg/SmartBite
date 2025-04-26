@@ -5,6 +5,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
 const ViewOrders = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [search, setSearch] = useState("");
@@ -12,7 +13,7 @@ const ViewOrders = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:5500/api/admin/orders", {
+        fetch(`${API_URL}/api/admin/orders`, {
             headers: {
                 Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
             },

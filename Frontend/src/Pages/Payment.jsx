@@ -6,6 +6,7 @@ import { useOrder } from "../Context/OrderContext";
 
 
 const Payment = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Payment = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5500/api/orders/place", {
+      const res = await fetch(`${API_URL}/api/orders/place`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

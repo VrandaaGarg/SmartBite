@@ -5,6 +5,7 @@ import { useToast } from "../Context/ToastContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ReviewModal = ({ dishId, onClose, existingReview }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -40,8 +41,8 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
     const customerId = JSON.parse(localStorage.getItem("current_user"))?.CustomerID;
 
     const url = existingReview
-      ? "http://localhost:5500/api/reviews/update"
-      : "http://localhost:5500/api/reviews/add";
+      ? `${API_URL}/api/reviews/update`
+      : `${API_URL}/api/reviews/add`;
 
     const method = existingReview ? "PUT" : "POST";
 

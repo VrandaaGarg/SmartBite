@@ -12,6 +12,7 @@ import { useToast } from "./ToastContext";
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { user } = useAuth();
   const { showToast } = useToast();
 
@@ -40,7 +41,7 @@ export const CartProvider = ({ children }) => {
     if (!user?.CustomerID) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5500/api/cart/${user.CustomerID}`);
+      const res = await fetch(`${API_URL}/api/cart/${user.CustomerID}`);
       const data = await res.json();
       const normalized = data.map(item => ({
         DishID: item.DishID, // 👈 important for remove/update
@@ -73,7 +74,7 @@ export const CartProvider = ({ children }) => {
   // ➕ Add to Cart
   const addToCart = async (dish) => {
     try {
-      const res = await fetch("http://localhost:5500/api/cart", {
+      const res = await fetch(`${API_URL}/api/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,7 +102,7 @@ export const CartProvider = ({ children }) => {
     if (newQuantity <= 0) return removeFromCart(DishID);
 
     try {
-      const res = await fetch(`http://localhost:5500/api/cart/update`, {
+      const res = await fetch(`${API_URL}/api/cart/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +124,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (DishID) => {
     try {
-      const res = await fetch(`http://localhost:5500/api/cart/remove`, {
+      const res = await fetch(`${API_URL}/api/cart/remove`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -147,7 +148,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      const res = await fetch(`http://localhost:5500/api/cart/clear/${user.CustomerID}`, {
+      const res = await fetch(`${API_URL}/api/cart/clear/${user.CustomerID}`, {
         method: "DELETE",
       });
   

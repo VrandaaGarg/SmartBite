@@ -8,6 +8,7 @@ import { useToast } from "../Context/ToastContext";
 import { useNavigate } from "react-router-dom";
 
 const AddDish = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [dish, setDish] = useState({
         Name: "",
         Description: "",
@@ -36,7 +37,7 @@ const AddDish = () => {
         e.preventDefault();
         try {
           const token = JSON.parse(localStorage.getItem("current_user"))?.token;
-          const res = await fetch("http://localhost:5500/api/admin/dishes/add", {
+          const res = await fetch(`${API_URL}/api/admin/dishes/add`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

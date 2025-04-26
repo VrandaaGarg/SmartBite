@@ -6,6 +6,7 @@ import { useToast } from "../Context/ToastContext";
 import axios from "axios";
 
 const ResetPassword = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [params] = useSearchParams();
   const token = params.get("token");
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5500/api/auth/reset-password", {
+      const res = await axios.post(`${API_URL}/api/auth/reset-password`, {
         token,
         password,
       });

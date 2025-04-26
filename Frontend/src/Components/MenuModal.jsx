@@ -3,6 +3,7 @@ import { FaStar, FaTimes, FaPlus, FaMinus, FaShoppingCart } from "react-icons/fa
 import { motion } from "framer-motion";
 
 const MenuModal = ({ dish, onClose, addToCart }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [reviews, setReviews] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -10,7 +11,7 @@ const MenuModal = ({ dish, onClose, addToCart }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:5500/api/reviews/dish/${dish.DishID}`);
+        const res = await fetch(`${API_URL}/api/reviews/dish/${dish.DishID}`);
         const data = await res.json();
         setReviews(data);
       } catch (err) {

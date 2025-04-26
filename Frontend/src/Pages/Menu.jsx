@@ -8,6 +8,7 @@ import MenuModal from "../Components/MenuModal";
 
 
 const Menu = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [filter, setFilter] = useState({ type: "all", maxPrice: 1000 });
   const [dishes, setDishes] = useState([]);
@@ -22,7 +23,7 @@ const Menu = () => {
   const [menus, setMenus] = useState([]);
 
 useEffect(() => {
-  fetch("http://localhost:5500/api/menus")
+  fetch(`${API_URL}/api/menus`)
     .then((res) => res.json())
     .then((data) => setMenus(data))
     .catch((err) => {
@@ -35,7 +36,7 @@ useEffect(() => {
 
 
   useEffect(() => {
-    fetch("http://localhost:5500/api/dishes")
+    fetch(`${API_URL}/api/dishes`)
       .then((res) => res.json())
       .then((data) => setDishes(data))
       .catch((err) => {

@@ -15,6 +15,7 @@ import { useToast } from "../Context/ToastContext";
 import axios from "axios";
 
 const Profile = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -64,7 +65,7 @@ const Profile = () => {
   
     // 🔁 Async sync to backend
     try {
-      await axios.put("http://localhost:5500/api/auth/update-profile", updatedUser);
+      await axios.put(`${API_URL}/api/auth/update-profile`, updatedUser);
       showToast("Profile updated successfully", "success");
       setIsEditing(false);
     } catch (err) {

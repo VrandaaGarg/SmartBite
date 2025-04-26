@@ -12,7 +12,7 @@ const ViewOrders = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/admin/orders", {
+        fetch("http://localhost:5500/api/admin/orders", {
             headers: {
                 Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
             },

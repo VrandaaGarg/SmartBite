@@ -12,7 +12,7 @@ function Footer() {
       setSubscribed(true);
       setEmail("");
       // In a real app, you'd send this to a backend
-      setTimeout(() => setSubscribed(false), 5000);
+      setTimeout(() => setSubscribed(false), 5500);
     }
   };
 

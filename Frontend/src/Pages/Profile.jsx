@@ -64,7 +64,7 @@ const Profile = () => {
   
     // 🔁 Async sync to backend
     try {
-      await axios.put("http://localhost:5000/api/auth/update-profile", updatedUser);
+      await axios.put("http://localhost:5500/api/auth/update-profile", updatedUser);
       showToast("Profile updated successfully", "success");
       setIsEditing(false);
     } catch (err) {

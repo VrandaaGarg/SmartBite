@@ -22,7 +22,7 @@ const Menu = () => {
   const [menus, setMenus] = useState([]);
 
 useEffect(() => {
-  fetch("http://localhost:5000/api/menus")
+  fetch("http://localhost:5500/api/menus")
     .then((res) => res.json())
     .then((data) => setMenus(data))
     .catch((err) => {
@@ -35,7 +35,7 @@ useEffect(() => {
 
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/dishes")
+    fetch("http://localhost:5500/api/dishes")
       .then((res) => res.json())
       .then((data) => setDishes(data))
       .catch((err) => {

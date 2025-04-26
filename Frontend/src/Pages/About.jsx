@@ -13,7 +13,7 @@ const About = () => {
 
   // Statistics to be animated
   const stats = [
-    { id: 'customers', label: 'Happy Customers', value: 5000, icon: FaUsers, color: 'bg-yellow-100 text-yellow-600' },
+    { id: 'customers', label: 'Happy Customers', value: 5500, icon: FaUsers, color: 'bg-yellow-100 text-yellow-600' },
     { id: 'dishes', label: 'Dishes', value: 100, icon: FaUtensils, color: 'bg-red-100 text-red-600' },
     { id: 'chefs', label: 'Expert Chefs', value: 25, icon: FaAward, color: 'bg-blue-100 text-blue-600' },
     { id: 'rating', label: 'Customer Rating', value: 4.8, icon: FaStar, color: 'bg-green-100 text-green-600', suffix: '/5' }

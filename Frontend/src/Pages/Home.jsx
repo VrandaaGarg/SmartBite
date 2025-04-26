@@ -43,7 +43,7 @@ const Home = () => {
       setCurrentTestimonial(prev => 
         prev === testimonials.length - 1 ? 0 : prev + 1
       );
-    }, 5000);
+    }, 5500);
     
     return () => clearInterval(interval);
   }, []);

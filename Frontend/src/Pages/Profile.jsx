@@ -85,7 +85,7 @@ const Profile = () => {
 
   return (
     <motion.div
-      className="max-w-2xl mx-auto p-8 mt-10 bg-white rounded-2xl shadow-xl"
+      className="max-w-2xl mx-auto p-8 md:my-10 bg-white rounded-2xl shadow-xl"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
@@ -166,18 +166,18 @@ const Profile = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10">
+      <div className="flex text-xs md:text-lg  flex-col-2 sm:flex-row justify-between items-center gap-4 mt-10">
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg shadow-sm"
+            className="flex items-center gap-1 md:gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 md:px-6 py-2 rounded-lg shadow-sm"
           >
             <FaUserEdit /> Edit Profile
           </button>
         ) : (
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-sm"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 md:px-6 py-2 rounded-lg shadow-sm"
           >
             <FaSave /> Save Changes
           </button>
@@ -185,7 +185,7 @@ const Profile = () => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow-sm"
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 md:px-6 py-2 rounded-lg shadow-sm"
         >
           <FaSignOutAlt /> Logout
         </button>

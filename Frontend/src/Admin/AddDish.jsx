@@ -36,6 +36,8 @@ const AddDish = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+          showToast("Adding dish...", "info"); // 🟡 Show adding loader toast immediately
+      
           const token = JSON.parse(localStorage.getItem("current_user"))?.token;
           const res = await fetch(`${API_URL}/api/admin/dishes/add`, {
             method: "POST",
@@ -48,16 +50,17 @@ const AddDish = () => {
       
           const data = await res.json();
           if (res.ok) {
-            showToast("Dish added successfully!", "success");
+            showToast("Dish added successfully!", "success"); // 🟢 Success toast
             setDish({ Name: "", Description: "", Price: "", Image: "", MenuID: "", Type: "veg" });
           } else {
-            showToast(data.error || "Failed to add dish", "error");
+            showToast(data.error || "Failed to add dish", "error"); // 🔴 Error toast
           }
         } catch (err) {
           console.error(err);
-          showToast("Server error", "error");
+          showToast("Server error", "error"); // 🔴 Server error toast
         }
       };
+      
 
     return (
         <motion.div
@@ -69,9 +72,9 @@ const AddDish = () => {
             {/* Back Button */}
             <button
                 onClick={() => navigate(-1)}
-                className="absolute top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
+                className="absolute top-2 md:top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-2 md:px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
             >
-                <FaArrowLeft /> Back
+                <FaArrowLeft /> <span className="hidden md:block">Back</span>
             </button>
 
             <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">

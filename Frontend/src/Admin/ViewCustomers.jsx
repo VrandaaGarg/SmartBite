@@ -128,10 +128,11 @@ const ViewCustomers = () => {
         >
             <button
                 onClick={() => navigate(-1)}
-                className="absolute top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
+                className="absolute top-2 md:top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-2 md:px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
             >
-                <FaArrowLeft /> Back
+                <FaArrowLeft /> <span className="hidden md:block">Back</span>
             </button>
+
 
             <div className="text-center w-full mb-10">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center justify-center gap-3">

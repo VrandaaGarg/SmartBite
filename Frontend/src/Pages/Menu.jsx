@@ -22,15 +22,15 @@ const Menu = () => {
   const [selectedDish, setSelectedDish] = useState(null);
   const [menus, setMenus] = useState([]);
 
-useEffect(() => {
-  fetch(`${API_URL}/api/menus`)
-    .then((res) => res.json())
-    .then((data) => setMenus(data))
-    .catch((err) => {
-      console.error("Error fetching menus:", err);
-      showToast("Failed to load menu categories!", "error");
-    });
-}, []);
+  useEffect(() => {
+    fetch(`${API_URL}/api/menus`)
+      .then((res) => res.json())
+      .then((data) => setMenus(data))
+      .catch((err) => {
+        console.error("Error fetching menus:", err);
+        showToast("Failed to load menu categories!", "error");
+      });
+  }, []);
 
 
 
@@ -68,8 +68,8 @@ useEffect(() => {
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.MenuID === selectedMenuId : true;
     const matchType =
-    filter.type === "all" || dish.Type === filter.type;
-  
+      filter.type === "all" || dish.Type === filter.type;
+
     const matchPrice = dish.Price <= filter.maxPrice;
     const matchSearch = searchQuery === "" ||
       dish.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -86,19 +86,19 @@ useEffect(() => {
   ];
 
   const currentCategoryName = selectedMenuId
-  ? menus.find(menu => menu.MenuID === selectedMenuId)?.Name
-  : "All Items";
+    ? menus.find(menu => menu.MenuID === selectedMenuId)?.Name
+    : "All Items";
 
 
   return (
-    <div className="py-8 px-4 max-w-7xl mx-auto">
+    <div className="py-4 md:py-8 px-4 max-w-7xl mx-auto">
       {/* Page Header with Search */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-red-700 mb-1">
+          <h1 className="text-2xl text-center md:text-4xl font-bold text-red-700 mb-1">
             {currentCategoryName}
           </h1>
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-sm md:text-lg text-center">
             {filteredDishes.length} items available
           </p>
         </div>
@@ -123,33 +123,32 @@ useEffect(() => {
       </div>
 
       {/* Category Scrollable Filters */}
-      <div className="mb-6 overflow-x-auto pb-2 hide-scrollbar">
+      <div className="mb-6 text-sm md:text-lg overflow-x-auto pb-2 hide-scrollbar">
         <div className="flex gap-2 min-w-max">
           <button
             onClick={() => setSelectedMenuId(null)}
-            className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${selectedMenuId === null
+            className={`rounded-full px-3 md:px-6 py-2 md:py-3 font-semibold border-2 flex items-center gap-2 ${selectedMenuId === null
               ? "bg-red-600 text-white border-red-600 shadow-md"
               : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
               } transition-all duration-200`}
           >
-            <FaUtensils className="text-lg" />
+            <FaUtensils className="" />
             All Categories
           </button>
 
           {menus.map((menu) => (
-  <button
-    key={menu.MenuID}
-    onClick={() => setSelectedMenuId(menu.MenuID === selectedMenuId ? null : menu.MenuID)}
-    className={`rounded-full px-6 py-3 text-sm font-semibold border-2 flex items-center gap-2 ${
-      selectedMenuId === menu.MenuID
-        ? "bg-red-600 text-white border-red-600 shadow-md"
-        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-    } transition-all duration-200`}
-  >
-    <span className="text-lg">{menu.Icon}</span>
-    {menu.Name}
-  </button>
-))}
+            <button
+              key={menu.MenuID}
+              onClick={() => setSelectedMenuId(menu.MenuID === selectedMenuId ? null : menu.MenuID)}
+              className={`rounded-full px-3 md:px-6 py-2 md:py-3  font-semibold border-2 flex items-center gap-2 ${selectedMenuId === menu.MenuID
+                  ? "bg-red-600 text-white border-red-600 shadow-md"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                } transition-all duration-200`}
+            >
+              <span className="">{menu.Icon}</span>
+              {menu.Name}
+            </button>
+          ))}
 
         </div>
       </div>
@@ -302,7 +301,7 @@ useEffect(() => {
       )}
 
       {/* Pagination - Placeholder for future implementation */}
-      {filteredDishes.length > 0 && (
+      {/* {filteredDishes.length > 0 && (
         <div className="mt-12 flex justify-center">
           <div className="bg-white shadow-sm rounded-full px-2">
             <button className="px-4 py-2 text-gray-600 hover:text-red-600 disabled:opacity-50">
@@ -322,7 +321,7 @@ useEffect(() => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Add these styles to your CSS file for hiding scrollbars nicely */}
       <style jsx>{`

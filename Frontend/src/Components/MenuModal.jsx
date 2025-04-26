@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { FaStar, FaTimes, FaPlus, FaMinus, FaShoppingCart } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useCart } from "../Context/CartContext"; // Adjust path if needed
 
-const MenuModal = ({ dish, onClose, addToCart }) => {
+
+const MenuModal = ({ dish, onClose }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [reviews, setReviews] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const { cart, addToCart, updateQuantity } = useCart(); // Get these from context
+
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -27,13 +31,23 @@ const MenuModal = ({ dish, onClose, addToCart }) => {
       ? (reviews.reduce((sum, r) => sum + r.Rating, 0) / reviews.length).toFixed(1)
       : null;
       
-  const handleAddToCart = () => {
-    addToCart && addToCart({...dish, quantity});
-    setAddedToCart(true);
-    setTimeout(() => {
-      setAddedToCart(false);
-    }, 1500);
-  };
+  const handleAddToCart = async () => {
+  const existingItem = cart.find(item => item.DishID === dish.DishID);
+
+  if (existingItem) {
+    // Already in cart → Update Quantity
+    await updateQuantity(dish.DishID, existingItem.quantity + quantity);
+  } else {
+    // Not in cart → Add to Cart
+    await addToCart({...dish, quantity});
+  }
+
+  setAddedToCart(true);
+  setTimeout(() => {
+    setAddedToCart(false);
+  }, 1500);
+};
+
   
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);

@@ -170,7 +170,7 @@ const About = () => {
                 <div className={`mx-auto ${stat.color} w-16 h-16 rounded-full flex items-center justify-center mb-4`}>
                   <stat.icon className="text-2xl" />
                 </div>
-                <h3 className="text-4xl font-bold text-gray-800">
+                <h3 className="text-xl md:text-4xl font-bold text-gray-800">
                   {animatedStats ? (
                     <>
                       {stat.value}

@@ -10,12 +10,16 @@ import {
   FaMinus,
 } from "react-icons/fa";
 import { MdOutlineFastfood } from "react-icons/md";
+import { useToast } from "../Context/ToastContext"; // ✅
+
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, loading } = useCart();
   const navigate = useNavigate();
   const [animateItems, setAnimateItems] = useState(false);
   const [removingItem, setRemovingItem] = useState(null);
+  const { showToast } = useToast(); // ✅
+
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -61,14 +65,14 @@ const Cart = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-[70vh] flex justify-center items-center">
-        <p className="text-gray-500 text-lg animate-pulse">Loading your cart...</p>
-      </div>
-    );
-  }
-  
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-[70vh] flex justify-center items-center">
+  //       <p className="text-gray-500 text-lg animate-pulse">Loading your cart...</p>
+  //     </div>
+  //   );
+  // }
+
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 pb-20">
@@ -82,19 +86,17 @@ const Cart = () => {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Cart Items List */}
         <div className="lg:w-2/3 space-y-4">
-        {cart.map((item, index) => (
-  <div
-    key={`${item.DishID}-${index}`}  // ✅ guaranteed unique
+          {cart.map((item, index) => (
+            <div
+              key={`${item.DishID}-${index}`}  // ✅ guaranteed unique
               className={`bg-white rounded-xl shadow-md overflow-hidden flex flex-col sm:flex-row 
-                ${
-                  animateItems
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
+                ${animateItems
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
                 } 
-                ${
-                  removingItem === item.DishID
-                    ? "opacity-0 transform scale-95"
-                    : ""
+                ${removingItem === item.DishID
+                  ? "opacity-0 transform scale-95"
+                  : ""
                 }
                 transition-all duration-300`}
               style={{ transitionDelay: `${index * 100}ms` }}
@@ -129,9 +131,12 @@ const Cart = () => {
                 <div className="flex justify-between items-center mt-4">
                   <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                     <button
+                      type="button"
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                      onClick={() => updateQuantity(item.DishID, item.quantity - 1)}
-
+                      onClick={() => {
+                        showToast("Updating quantity...", "info");  // 🟡 Toast immediately
+                        updateQuantity(item.DishID, item.quantity - 1);
+                      }}
                       disabled={item.quantity <= 1}
                       aria-label="Decrease quantity"
                     >
@@ -140,9 +145,12 @@ const Cart = () => {
                     <span className="px-4 py-1 font-medium">{item.quantity}</span>
 
                     <button
+                      type="button"
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                      onClick={() => updateQuantity(item.DishID, item.quantity + 1)}
-
+                      onClick={() => {
+                        showToast("Updating quantity...", "info");  // 🟡 Toast immediately
+                        updateQuantity(item.DishID, item.quantity + 1);
+                      }}
                       aria-label="Increase quantity"
                     >
                       <FaPlus size={12} />
@@ -156,7 +164,7 @@ const Cart = () => {
             </div>
           ))}
 
-          <div className="flex justify-between pt-4">
+          <div className="md:flex justify-center md:justify-between pt-4">
             <button
               onClick={() => navigate("/menu")}
               className="flex items-center text-red-600 hover:text-red-700 font-medium transition"

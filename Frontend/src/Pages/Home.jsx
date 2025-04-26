@@ -70,7 +70,7 @@ const Home = () => {
           <div className="inline-block mb-6 text-amber-200 bg-red-900/50 rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm animate-fade-in-down">
             Delivering Happiness 🚚
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight animate-gradient-text bg-gradient-to-r from-amber-200 via-white to-amber-200 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-gradient-text bg-gradient-to-r from-amber-200 via-white to-amber-200 bg-clip-text text-transparent">
             Delicious Food<br />
             <span className="text-amber-200 drop-shadow-lg">Delivered To Your Door</span>
           </h1>
@@ -80,7 +80,7 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up">
             <Link
               to="/menu"
-              className="bg-gradient-to-r from-amber-400 to-amber-500 text-red-900 font-semibold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-lg animate-bounce-once"
+              className=" bg-gradient-to-r from-amber-400 to-amber-500 text-red-900 font-semibold px-2 md:px-8 py-2 md:py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-lg animate-bounce-once"
             >
               Explore Menu
             </Link>
@@ -157,7 +157,7 @@ const Home = () => {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="bg-red-100 text-red-800 rounded-full px-4 py-1 text-sm font-medium">Why Choose Us</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+            <h2 className="text-3xl mt-3 md:text-4xl font-bold text-gray-800">
               Experience The Best Indian Food Delivery
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">

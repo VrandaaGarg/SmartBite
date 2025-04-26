@@ -59,20 +59,23 @@ const ViewOrders = () => {
             transition={{ duration: 0.5 }}
         >
             <div className="mb-6">
+
                 <button
                     onClick={() => navigate(-1)}
-                    className="absolute right-6 top-6 flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition rounded-lg shadow-md"
+                    className="absolute top-2 md:top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-2 md:px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
                 >
-                    <IoArrowBack size={18} /> Back
+                    <IoArrowBack /> <span className="hidden md:block">Back</span>
                 </button>
+
+
             </div>
-            
+
             <div className="mb-10">
                 <h2 className="text-3xl md:text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-yellow-500 flex items-center justify-center gap-3">
                     <FaSort className="text-red-500" /> All Orders
                 </h2>
             </div>
-            
+
             <div className="flex flex-col md:flex-row gap-4 items-center justify-center mb-8">
                 <div className="flex items-center gap-2 px-4 py-3 border rounded-full bg-white shadow-sm transition-all w-full max-w-xs focus-within:shadow-md focus-within:ring-2 focus-within:ring-red-400">
                     <FaSearch className="text-red-400" />
@@ -94,7 +97,7 @@ const ViewOrders = () => {
                     />
                 </div>
             </div>
-            
+
             {filteredOrders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-gray-500">
                     <FaSort className="text-6xl mb-4 text-gray-300" />
@@ -131,7 +134,7 @@ const ViewOrders = () => {
                                     <h3 className="text-base font-semibold text-gray-800 border-b border-gray-200 pb-2">Customer Info</h3>
                                     <p className="flex items-center gap-2">
                                         <FaUserCircle className="text-red-400" />
-                                        <span className="font-medium">{order.Customer.Name}</span> 
+                                        <span className="font-medium">{order.Customer.Name}</span>
                                         <span className="text-xs text-gray-500">(ID: {order.Customer.CustomerID})</span>
                                     </p>
                                     <p className="flex items-center gap-2">
@@ -141,7 +144,7 @@ const ViewOrders = () => {
                                         <FaPhone className="text-red-400" /> {order.Customer.Phone || "N/A"}
                                     </p>
                                     <p className="flex items-start gap-2">
-                                        <FaMapMarkerAlt className="text-red-400 mt-1" /> 
+                                        <FaMapMarkerAlt className="text-red-400 mt-1" />
                                         <span className="text-gray-600">{order.Customer.Address || "No address provided"}</span>
                                     </p>
                                 </div>

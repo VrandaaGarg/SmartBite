@@ -52,7 +52,7 @@ const ViewCustomers = () => {
     };
 
     useEffect(() => {
-        fetch("http://localhost:5500/api/admin/customers", {
+        fetch(`${API_URL}/api/admin/customers`, {
             headers: {
                 Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
             },

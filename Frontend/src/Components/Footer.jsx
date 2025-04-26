@@ -84,7 +84,7 @@ function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-red-100 hover:text-yellow-300 transition-colors flex items-center">
-                  <span className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span> Home
+                   Home
                 </Link>
               </li>
               <li>

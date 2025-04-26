@@ -156,7 +156,7 @@ const Cart = () => {
             </div>
           ))}
 
-          <div className="flex justify-between pt-4">
+          <div className="md:flex justify-center md:justify-between pt-4">
             <button
               onClick={() => navigate("/menu")}
               className="flex items-center text-red-600 hover:text-red-700 font-medium transition"

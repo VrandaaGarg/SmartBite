@@ -80,7 +80,7 @@ const OrderHistory = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6">
+    <div className="max-w-5xl mx-auto py-4 md:py-10 px-4 sm:px-6">
       <motion.div 
         className="text-center mb-10"
         initial={{ opacity: 0, y: -20 }}
@@ -125,12 +125,12 @@ const OrderHistory = () => {
               <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
                 <div className="flex flex-wrap justify-between items-center gap-3">
                   <div className="flex items-start gap-3">
-                    <div className="bg-red-50 p-2 rounded-lg border border-red-100">
+                    <div className="bg-red-50 p-2  rounded-lg border border-red-100">
                       <FaReceipt className="text-red-500 text-xl" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg text-gray-800">Order #{order.OrderID}</h3>
-                      <div className="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+                      <div className="text-xs md:text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
                         <FaCalendarAlt className="text-gray-400" />
                         {orderDateTime.toLocaleDateString('en-US', { 
                           year: 'numeric', 
@@ -147,10 +147,10 @@ const OrderHistory = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-center">
-                    <span className={`text-sm font-medium px-3 py-1.5 rounded-full flex items-center whitespace-nowrap ${status.color}`}>
+                    <span className={`text-sm md:text-sm font-medium px-3 py-1.5 rounded-full flex items-center whitespace-nowrap ${status.color}`}>
                       {status.icon} {status.label}
                     </span>
-                    <span className="font-bold text-gray-800 flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
+                    <span className="font-bold text-gray-800 flex text-xs md:text-sm items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
                       <FaRupeeSign className="text-yellow-600" /> ₹{order.Amount}
                     </span>
                   </div>
@@ -159,16 +159,16 @@ const OrderHistory = () => {
   
               <div className="p-6">
                 {/* Order Items */}
-                <div className="mb-6">
+                <div className="mb-2 md:mb-6">
                   <h4 className="text-gray-700 font-medium mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
                     <FaShoppingBag className="text-red-500" /> Order Items
                   </h4>
                 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
                     {order.items?.map((item, i) => (
                       <div 
                         key={i} 
-                        className="flex gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 border border-gray-100"
+                        className=" flex gap-2 md:gap-4 p-2 md:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 border border-gray-100"
                       >
                         <img
                           src={item.image}
@@ -180,10 +180,10 @@ const OrderHistory = () => {
                           }}
                         />
                         <div className="flex-1">
-                          <h5 className="font-medium text-gray-800 mb-1">{item.name}</h5>
+                          <h5 className="text-sm md:text-xl font-medium text-gray-800 mb-1">{item.name}</h5>
                           <div className="flex justify-between text-sm text-gray-600 mb-2">
-                            <span className="bg-white px-2 py-0.5 rounded border border-gray-200">Qty: {item.quantity}</span>
-                            <span className="font-semibold text-red-600">₹{item.price * item.quantity}</span>
+                            <span className="bg-white text-xs md:text-lg px-2 py-0.5 rounded border border-gray-200">Qty: {item.quantity}</span>
+                            <span className="font-semibold text-xs md:text-lg items-center justify-center text-red-600">₹{item.price * item.quantity}</span>
                           </div>
 
                           {item.review ? (
@@ -198,7 +198,7 @@ const OrderHistory = () => {
                                   ))}
                                 </div>
                                 <button
-                                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1"
+                                  className="text-xs md:text-lg bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1"
                                   onClick={() =>
                                     setReviewModal({
                                       dishId: item.DishID || item.id,
@@ -213,7 +213,7 @@ const OrderHistory = () => {
                             </div>
                           ) : (
                             <button
-                              className="mt-2 text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 transition-colors w-full flex items-center justify-center gap-1.5"
+                              className="mt-2 text-xs md:text-lg bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 transition-colors w-full flex items-center justify-center gap-1.5"
                               onClick={() => setReviewModal({ dishId: item.DishID || item.id })}
                             >
                               <FaStar size={12} /> Write a Review
@@ -225,8 +225,8 @@ const OrderHistory = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm pt-4 border-t border-gray-100">
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm pt-2 md:pt-4 border-t border-gray-100">
+                  <div className="bg-gray-50 p-2 md:p-4 rounded-lg border border-gray-100">
                     <h4 className="text-gray-700 font-medium mb-2 flex items-center gap-2">
                       <FaMapMarkerAlt className="text-red-500" /> Delivery Address
                     </h4>
@@ -234,7 +234,7 @@ const OrderHistory = () => {
                       {user?.HouseNo}, {user?.Street}, {user?.Landmark}, {user?.City}, {user?.State} - {user?.Pincode}
                     </p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div className="bg-gray-50 p-2 md:p-4 rounded-lg border border-gray-100">
                     <h4 className="text-gray-700 font-medium mb-2 flex items-center gap-2">
                       <FaClock className="text-red-500" /> Delivery Information
                     </h4>

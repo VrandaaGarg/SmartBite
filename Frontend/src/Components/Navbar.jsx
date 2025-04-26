@@ -315,14 +315,14 @@ export default function Navbar() {
               )}
 
               {/* Logout button for mobile */}
-              {user && (
+              {/* {user && (
                 <DisclosureButton
                   onClick={logout}
                   className="flex items-center justify-center gap-2 px-4 py-3 rounded-md text-base font-medium text-white hover:bg-red-900/50 w-full mt-2"
                 >
                   <FaSignOutAlt /> Logout
                 </DisclosureButton>
-              )}
+              )} */}
 
 
 

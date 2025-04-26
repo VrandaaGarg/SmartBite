@@ -31,7 +31,7 @@ const ManageDishes = () => {
 
   const fetchDishes = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/dishes", {
+      const res = await fetch("http://localhost:5500/api/admin/dishes", {
         headers: {
           Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
         },
@@ -50,7 +50,7 @@ const ManageDishes = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/dishes/${id}`, {
+      const res = await fetch(`http://localhost:5500/api/admin/dishes/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
@@ -71,7 +71,7 @@ const ManageDishes = () => {
 
   const handleUpdate = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/dishes/${editingDish.DishID}`, {
+      const res = await fetch(`http://localhost:5500/api/admin/dishes/${editingDish.DishID}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

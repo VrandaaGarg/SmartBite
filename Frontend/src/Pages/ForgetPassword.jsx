@@ -20,7 +20,7 @@ const ForgotPassword = () => {
     const toastId = showToast("Sending reset mail...", "loading");
   
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      const res = await axios.post("http://localhost:5500/api/auth/forgot-password", { email });
   
       showToast(res.data.message, "success", toastId); // replace loading toast
       setEmail("");

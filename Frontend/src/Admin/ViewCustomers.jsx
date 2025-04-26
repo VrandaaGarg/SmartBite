@@ -19,7 +19,7 @@ const ViewCustomers = () => {
 
     const handleAdminChange = async (email, makeAdmin = true) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/${makeAdmin ? "promote" : "demote"}`, {
+            const res = await fetch(`http://localhost:5500/api/admin/${makeAdmin ? "promote" : "demote"}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -51,7 +51,7 @@ const ViewCustomers = () => {
     };
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/admin/customers", {
+        fetch("http://localhost:5500/api/admin/customers", {
             headers: {
                 Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
             },

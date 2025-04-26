@@ -13,7 +13,7 @@ export const OrderProvider = ({ children }) => {
   // ✅ Fetch orders
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/customer/${user.CustomerID}`);
+      const res = await fetch(`http://localhost:5500/api/orders/customer/${user.CustomerID}`);
       const data = await res.json();
       if (res.ok) {
         setOrders(data);

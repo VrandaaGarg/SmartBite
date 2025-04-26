@@ -36,7 +36,7 @@ const AddDish = () => {
         e.preventDefault();
         try {
           const token = JSON.parse(localStorage.getItem("current_user"))?.token;
-          const res = await fetch("http://localhost:5000/api/admin/dishes/add", {
+          const res = await fetch("http://localhost:5500/api/admin/dishes/add", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

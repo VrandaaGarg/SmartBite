@@ -10,7 +10,7 @@ const MenuModal = ({ dish, onClose, addToCart }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/reviews/dish/${dish.DishID}`);
+        const res = await fetch(`http://localhost:5500/api/reviews/dish/${dish.DishID}`);
         const data = await res.json();
         setReviews(data);
       } catch (err) {

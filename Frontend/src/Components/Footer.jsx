@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaInstagram, FaFacebookF, FaTwitter, FaYoutube, FaArrowRight } from "react-icons/fa";
+import { FaInstagram, FaFacebookF, FaTwitter, FaYoutube, FaArrowRight,FaLinkedin,FaGithub ,FaMailchimp} from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
+import { CiMail } from "react-icons/ci";
+import { useEffect } from "react";
 
 function Footer() {
   const [email, setEmail] = useState("");
@@ -8,26 +11,33 @@ function Footer() {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
+
     if (email) {
       setSubscribed(true);
       setEmail("");
-      // In a real app, you'd send this to a backend
-      setTimeout(() => setSubscribed(false), 5500);
+
+      // In a real application, you'd send the email to your backend here
+
+      // Auto-hide the popup after 5.5 seconds
+      setTimeout(() => {
+        setSubscribed(false);
+      }, 2000);
     }
   };
+
 
   return (
     <footer className="bg-gradient-to-r from-red-800 to-red-700 text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Newsletter Section */}
-        <div className="max-w-4xl mx-auto mb-12 px-4 py-8 bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl">
+        <div className="max-w-4xl mx-auto mb-12 px-4 py-8 bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl relative ">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold text-white">Join Our Foodie Community</h3>
-            <p className="text-red-100 mt-2">
-              Get exclusive offers, discounts and new dish updates straight to your inbox
+            <h3 className="text-3xl font-bold text-white">Join Our Foodie Community</h3>
+            <p className="text-red-100 mt-2 text-lg">
+              Get exclusive offers, discounts, and new dish updates straight to your inbox!
             </p>
           </div>
-          
+
           <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
             <input
               type="email"
@@ -44,14 +54,20 @@ function Footer() {
               Subscribe <FaArrowRight className="inline ml-1" />
             </button>
           </form>
-          
+
+          {/* Happening Popup */}
           {subscribed && (
-            <div className="mt-4 text-center text-yellow-300 animate-pulse">
-              Thanks for subscribing!
+            <div className="absolute top-4 right-4 bg-white/90 text-black p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce z-20">
+              <FaCheckCircle className="text-green-500 text-2xl" />
+              <div>
+                <p className="font-bold text-lg">Subscribed!</p>
+                <p className="text-sm">You'll hear from us soon 🍔🍕🍟</p>
+              </div>
             </div>
           )}
         </div>
-        
+
+
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
@@ -64,27 +80,27 @@ function Footer() {
             </p>
             {/* Social Icons */}
             <div className="flex mt-6 space-x-4 text-xl">
-              <a href="https://instagram.com" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
+              <a href="https://www.instagram.com/vranda_garg" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
                 <FaInstagram />
               </a>
-              <a href="https://facebook.com" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
-                <FaFacebookF />
+              <a href="https://www.linkedin.com/in/vranda-garg-b68011293/" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
+                <FaLinkedin />
               </a>
-              <a href="https://twitter.com" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
-                <FaTwitter />
+              <a href="https://github.com/VrandaaGarg" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
+                <FaGithub />
               </a>
-              <a href="https://youtube.com" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
-                <FaYoutube />
+              <a href="mailto:connect@vrandacodz.xyz" className="bg-white/10 p-2.5 rounded-full hover:bg-white hover:text-red-600 transition-colors">
+                <CiMail />
               </a>
             </div>
           </div>
-          
+
           <div>
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">Quick Links</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-red-100 hover:text-yellow-300 transition-colors flex items-center">
-                   Home
+                  Home
                 </Link>
               </li>
               <li>
@@ -101,7 +117,7 @@ function Footer() {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">Help & Support</h4>
             <ul className="space-y-2">
@@ -119,17 +135,26 @@ function Footer() {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">Contact</h4>
             <ul className="space-y-3">
-              <li className="flex items-start">
-                <span className="mr-3">📞</span>
-                <span className="text-red-100">+91 98765 43210</span>
+              <li className="flex items-center space-x-3">
+                <FaGithub className="text-xl text-white" />
+                <a
+                  href="https://github.com/VrandaaGarg/SmartBite"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-red-100 hover:text-yellow-300 transition-colors"
+                >
+                  SmartBite
+                </a>
               </li>
+
+
               <li className="flex items-start">
                 <span className="mr-3">📧</span>
-                <a href="mailto:support@smartbite.com" className="text-red-100 hover:text-yellow-300 transition-colors">
+                <a href="mailto:connect@vrandacodz.xyz" className="text-red-100 hover:text-yellow-300 transition-colors">
                   support@smartbite.com
                 </a>
               </li>

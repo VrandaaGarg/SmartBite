@@ -94,11 +94,11 @@ const Menu = () => {
     <div className="py-4 md:py-8 px-4 max-w-7xl mx-auto">
       {/* Page Header with Search */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl text-center md:text-4xl font-bold text-red-700 mb-1">
+        <div className="text-left">
+          <h1 className="text-2xl  md:text-4xl font-bold text-red-700 mb-1">
             {currentCategoryName}
           </h1>
-          <p className="text-gray-500 text-sm md:text-lg text-center">
+          <p className="text-gray-500 text-sm md:text-lg ">
             {filteredDishes.length} items available
           </p>
         </div>

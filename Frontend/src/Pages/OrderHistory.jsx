@@ -182,8 +182,8 @@ const OrderHistory = () => {
                         <div className="flex-1">
                           <h5 className="text-sm md:text-xl font-medium text-gray-800 mb-1">{item.name}</h5>
                           <div className="flex justify-between text-sm text-gray-600 mb-2">
-                            <span className="bg-white text-xs md:text-lg px-2 py-0.5 rounded border border-gray-200">Qty: {item.quantity}</span>
-                            <span className="font-semibold text-xs md:text-lg items-center justify-center text-red-600">₹{item.price * item.quantity}</span>
+                            <span className="bg-white text-xs md:text-sm px-2 py-0.5 rounded border border-gray-200">Qty: {item.quantity}</span>
+                            <span className="font-semibold text-xs md:text-sm items-center justify-center text-red-600">₹{item.price * item.quantity}</span>
                           </div>
 
                           {item.review ? (
@@ -198,7 +198,7 @@ const OrderHistory = () => {
                                   ))}
                                 </div>
                                 <button
-                                  className="text-xs md:text-lg bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1"
+                                  className="text-xs md:text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded-md flex items-center gap-1"
                                   onClick={() =>
                                     setReviewModal({
                                       dishId: item.DishID || item.id,

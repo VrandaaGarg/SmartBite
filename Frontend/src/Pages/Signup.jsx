@@ -156,12 +156,12 @@ const Signup = () => {
 
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6">
+    <div className="max-w-3xl mx-auto py-5 md:py-10 px-4 sm:px-6">
       <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-red-600 mb-2">Create Your Account</h1>
-          <p className="text-gray-600">Join the SmartBite family and enjoy delicious food</p>
+          <h1 className="text-xl md:text-3xl font-bold text-red-600 mb-2">Create Your Account</h1>
+          <p className="text-gray-600 text-sm md:text-lg">Join the SmartBite family and enjoy delicious food</p>
 
           {/* Steps Indicator */}
           <div className="mt-8 flex justify-center">
@@ -454,7 +454,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
+                  className="border border-gray-300 text-gray-700 px-3 md:px-6 py-3 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
                 >
                   <span>←</span> Back
                 </button>
@@ -462,7 +462,7 @@ const Signup = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition flex items-center gap-2 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
+                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 md:px-6 py-3 rounded-lg transition flex items-center gap-2 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
                     }`}
                 >
                   {isLoading ? (

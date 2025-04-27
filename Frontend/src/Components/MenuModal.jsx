@@ -58,7 +58,7 @@ const MenuModal = ({ dish, onClose }) => {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative bg-white rounded-xl sm:rounded-2xl w-full max-w-xl max-h-[90vh] md:max-h-[85vh] flex flex-col shadow-2xl overflow-hidden my-auto"
+        className="relative bg-white rounded-xl sm:rounded-2xl w-full max-w-xl max-h-[70vh] md:max-h-[85vh] flex flex-col shadow-2xl overflow-hidden my-auto"
       >
         {/* Close Button */}
         <button

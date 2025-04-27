@@ -177,14 +177,7 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onClose}
-            className="px-5 py-2.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-gray-700 font-medium"
-          >
-            Cancel
-          </motion.button>
+          
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -210,6 +203,15 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
                 <span>{existingReview ? "Update Review" : "Submit Review"}</span>
               </>
             )}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onClose}
+            className="px-5 py-2.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-gray-700 font-medium"
+          >
+            Cancel
           </motion.button>
         </div>
       </motion.div>

@@ -64,7 +64,7 @@ const CustomerService = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 animate-fadeIn">
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-16 animate-fadeIn">
       {/* Hero Section */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-red-600 mb-4">
@@ -135,7 +135,7 @@ const CustomerService = () => {
       {/* FAQs Accordion */}
       <section className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Frequently Asked Questions</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Frequently Asked Questions</h2>
           <p className="text-gray-600">Find quick answers to common questions</p>
         </div>
         
@@ -150,7 +150,7 @@ const CustomerService = () => {
                     : 'bg-white hover:bg-gray-50 text-gray-800'
                 } shadow-sm`}
               >
-                <span className="font-semibold text-lg">
+                <span className="font-semibold text-sm md:text-lg">
                   {faq.question}
                 </span>
                 {activeQuestion === faq.id ? <FaChevronUp /> : <FaChevronDown />}
@@ -171,21 +171,21 @@ const CustomerService = () => {
       {/* Business Hours */}
       <section className="my-16 text-center">
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">Business Hours</h3>
-        <div className="bg-white rounded-xl shadow-sm p-6 max-w-lg mx-auto">
-          <div className="grid grid-cols-2 gap-2 text-lg">
-            <div className="text-gray-600 text-right">Monday - Friday:</div>
-            <div className="text-gray-800 font-medium text-left">10:00 AM - 11:00 PM</div>
-            <div className="text-gray-600 text-right">Saturday - Sunday:</div>
-            <div className="text-gray-800 font-medium text-left">11:00 AM - 10:00 PM</div>
-            <div className="text-gray-600 text-right">Holidays:</div>
-            <div className="text-gray-800 font-medium text-left">11:00 AM - 9:00 PM</div>
+        <div className="bg-white rounded-xl text-left shadow-sm p-3 md:p-6 max-w-lg mx-auto">
+          <div className="grid grid-cols-2 gap-2 text-sm md:text-lg">
+            <div className="text-gray-600 ">Monday - Friday:</div>
+            <div className="text-gray-800 font-medium ">10:00 AM - 11:00 PM</div>
+            <div className="text-gray-600 ">Saturday - Sunday:</div>
+            <div className="text-gray-800 font-medium ">11:00 AM - 10:00 PM</div>
+            <div className="text-gray-600 ">Holidays:</div>
+            <div className="text-gray-800 font-medium ">11:00 AM - 9:00 PM</div>
           </div>
         </div>
       </section>
 
       {/* Quote */}
       <div className="text-center mt-16 max-w-3xl mx-auto">
-        <p className="text-xl italic text-gray-600 mb-2">
+        <p className="text-lg md:text-xl italic text-gray-600 mb-2">
           "We're not just about food — we're about creating experiences and memories around the dining table."
         </p>
         <p className="text-sm text-gray-500">— Team SmartBite</p>

@@ -86,6 +86,9 @@ const forgotPassword = (req, res) => {
   const { email } = req.body;
   const token = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min from now
+  const CLIENT_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://smartbite.vrandagarg.me' 
+  : 'http://localhost:5173';
 
   const findUserSql = "SELECT * FROM CUSTOMER WHERE Email = ?";
   db.query(findUserSql, [email], (err, result) => {
@@ -99,7 +102,7 @@ const forgotPassword = (req, res) => {
         return res.status(500).json({ error: "Could not save reset token" });
       }
 
-      const resetLink = `http://localhost:5173/reset-password?token=${token}`; // replace in prod
+     const resetLink = `${CLIENT_URL}/reset-password?token=${token}`; // replace in prod
 
       const mailOptions = {
         from: `"SmartBite Support" <${process.env.EMAIL_USER}>`,

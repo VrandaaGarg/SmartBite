@@ -123,7 +123,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Right: Cart + Avatar + Hamburger + Auth Buttons */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center gap-2 md:gap-8">
                   {/* Cart Icon (Both Mobile & Desktop) */}
                   <Link
                     to="/cart"
@@ -131,7 +131,7 @@ export default function Navbar() {
                     aria-label="Shopping Cart"
                   >
 
-                    <FaShoppingCart className="text-xl" />
+                    <FaShoppingCart className="text-2xl" />
                     {cartItemCount > 0 && (
                       <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {cartItemCount}
@@ -187,12 +187,12 @@ export default function Navbar() {
 
                   {/* 📱 Hamburger (Mobile Only) */}
                   <div className="md:hidden">
-                    <DisclosureButton className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-red-700/50 focus:outline-none transition">
+                    <DisclosureButton className="inline-flex items-center justify-center rounded-md text-white hover:bg-red-700/50 focus:outline-none transition">
                       <span className="sr-only">Open menu</span>
                       {open ? (
-                        <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                        <XMarkIcon className="h-8 w-8 my-auto" aria-hidden="true" />
                       ) : (
-                        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                        <Bars3Icon className="h-8 w-8 my-auto" aria-hidden="true" />
                       )}
                     </DisclosureButton>
                   </div>
@@ -281,7 +281,7 @@ export default function Navbar() {
               ))}
 
               {/* Orders button for mobile */}
-              {user && (
+              {/* {user && (
                 <DisclosureButton
                   as={Link}
                   to="/orders"
@@ -292,7 +292,7 @@ export default function Navbar() {
                 >
                   <FaListAlt /> My Orders
                 </DisclosureButton>
-              )}
+              )} */}
 
               {/* Mobile auth buttons */}
               {!user && (

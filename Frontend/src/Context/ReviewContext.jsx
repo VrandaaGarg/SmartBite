@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthContext';
-import { useToast } from './ToastContext';
-import { 
-  getAllReviews, 
-  getAllUsers, 
-  getReviewsForDish, 
-  getReviewsByCustomer,
-  STORAGE_KEYS 
-} from '../utils/localStorage';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { useAuth } from "./AuthContext";
+import { useToast } from "./ToastContext";
+import appwriteService from "../config/service";
 
 const ReviewContext = createContext();
 
@@ -17,195 +17,230 @@ export const ReviewProvider = ({ children }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all reviews and enrich with customer names
+  // Fetch all reviews from Appwrite and enrich with customer names
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
-      const reviewData = getAllReviews();
-      const users = getAllUsers();
-      
-      // Enrich reviews with customer names
-      const enrichedReviews = reviewData.map(review => {
-        const customer = users.find(user => user.CustomerID === review.CustomerID);
+      const reviewData = await appwriteService.getReviews();
+      const users = await appwriteService.getAllUsers();
+
+      // Enrich reviews with customer names and transform data
+      const enrichedReviews = reviewData.map((review) => {
+        const customer = users.find((user) => user.$id === review.userId);
         return {
           ...review,
-          CustomerName: customer ? customer.Name : 'Anonymous User'
+          ReviewID: review.$id,
+          DishID: review.dishId,
+          CustomerID: review.userId,
+          Rating: review.rating,
+          Comment: review.comment,
+          CreatedAt: review.createdAt,
+          CustomerName: customer
+            ? customer.name || customer.Name
+            : "Anonymous User",
         };
       });
 
       setReviews(enrichedReviews);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
-      showToast('Error loading reviews', 'error');
+      console.error("Error fetching reviews:", error);
+      showToast("Error loading reviews", "error");
+      setReviews([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
   }, [showToast]);
 
   // Get reviews for a specific dish
-  const getReviewsForDishId = useCallback((dishId) => {
-    return reviews.filter(review => review.DishID === parseInt(dishId))
-      .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
-  }, [reviews]);
+  const getReviewsForDishId = useCallback(
+    (dishId) => {
+      return reviews
+        .filter((review) => {
+          // Handle both string and integer comparisons
+          return review.DishID == dishId || review.dishId == dishId;
+        })
+        .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+    },
+    [reviews]
+  );
 
   // Get reviews by customer
-  const getCustomerReviews = useCallback((customerId) => {
-    return reviews.filter(review => review.CustomerID === parseInt(customerId))
-      .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
-  }, [reviews]);
+  const getCustomerReviews = useCallback(
+    (customerId) => {
+      return reviews
+        .filter(
+          (review) =>
+            review.CustomerID == customerId || review.userId == customerId
+        )
+        .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+    },
+    [reviews]
+  );
 
   // Add or update a review
-  const saveReview = useCallback(async (reviewData) => {
-    if (!user?.CustomerID) {
-      showToast('Please login to submit review', 'error');
-      return null;
-    }
+  const saveReview = useCallback(
+    async (reviewData) => {
+      if (!user?.$id) {
+        showToast("Please login to submit review", "error");
+        return null;
+      }
 
-    try {
-      const existingReviews = getAllReviews();
-      const users = getAllUsers();
-      
-      const newReviewData = {
-        DishID: reviewData.DishID,
-        CustomerID: user.CustomerID,
-        Rating: reviewData.Rating,
-        Comment: reviewData.Comment,
-        CreatedAt: new Date().toISOString(),
-        ReviewID: reviewData.ReviewID || `review_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
-      };
+      try {
+        // Check if review already exists for this user and dish
+        const existingReviews = await appwriteService.getReviewsByUser(
+          user.$id
+        );
+        const existingReview = existingReviews.find(
+          (review) => review.dishId == reviewData.DishID
+        );
 
-      // Check if review already exists
-      const existingReviewIndex = existingReviews.findIndex(
-        review => review.DishID === reviewData.DishID && review.CustomerID === user.CustomerID
-      );
-
-      let updatedReviews;
-      let isUpdate = false;
-
-      if (existingReviewIndex !== -1) {
-        // Update existing review
-        updatedReviews = [...existingReviews];
-        updatedReviews[existingReviewIndex] = { 
-          ...updatedReviews[existingReviewIndex], 
-          ...newReviewData 
+        const reviewPayload = {
+          dishId: reviewData.DishID,
+          userId: user.$id,
+          rating: reviewData.Rating,
+          comment: reviewData.Comment,
         };
-        isUpdate = true;
-      } else {
-        // Add new review
-        updatedReviews = [...existingReviews, newReviewData];
+
+        let savedReview;
+        let isUpdate = false;
+
+        if (existingReview) {
+          // Update existing review
+          savedReview = await appwriteService.updateReview(
+            existingReview.$id,
+            reviewPayload
+          );
+          isUpdate = true;
+        } else {
+          // Create new review
+          savedReview = await appwriteService.createReview(reviewPayload);
+        }
+
+        // Transform the saved review to match expected format
+        const enrichedReview = {
+          ...savedReview,
+          ReviewID: savedReview.$id,
+          DishID: savedReview.dishId,
+          CustomerID: savedReview.userId,
+          Rating: savedReview.rating,
+          Comment: savedReview.comment,
+          CreatedAt: savedReview.createdAt,
+          CustomerName: user.name || user.Name || "Anonymous User",
+        };
+
+        // Update local state
+        if (isUpdate) {
+          setReviews((prev) =>
+            prev.map((review) =>
+              (review.DishID == reviewData.DishID ||
+                review.dishId == reviewData.DishID) &&
+              (review.CustomerID == user.$id || review.userId == user.$id)
+                ? enrichedReview
+                : review
+            )
+          );
+        } else {
+          setReviews((prev) => [enrichedReview, ...prev]);
+        }
+
+        showToast(
+          isUpdate
+            ? "Review updated successfully!"
+            : "Review submitted successfully!",
+          "success"
+        );
+
+        return enrichedReview;
+      } catch (error) {
+        console.error("Error saving review:", error);
+        showToast("Failed to save review", "error");
+        return null;
       }
-
-      // Save to localStorage
-      localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(updatedReviews));
-
-      // Enrich the new review with customer name
-      const customer = users.find(u => u.CustomerID === user.CustomerID);
-      const enrichedReview = {
-        ...newReviewData,
-        CustomerName: customer ? customer.Name : 'Anonymous User'
-      };
-
-      // Update local state
-      if (isUpdate) {
-        setReviews(prev => prev.map(review => 
-          review.DishID === reviewData.DishID && review.CustomerID === user.CustomerID
-            ? enrichedReview
-            : review
-        ));
-      } else {
-        setReviews(prev => [enrichedReview, ...prev]);
-      }
-
-      // Trigger storage event for other components
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: STORAGE_KEYS.REVIEWS,
-        newValue: JSON.stringify(updatedReviews)
-      }));
-
-      showToast(
-        isUpdate ? 'Review updated successfully!' : 'Review submitted successfully!',
-        'success'
-      );
-
-      return enrichedReview;
-    } catch (error) {
-      console.error('Error saving review:', error);
-      showToast('Failed to save review', 'error');
-      return null;
-    }
-  }, [user, showToast]);
+    },
+    [user, showToast]
+  );
 
   // Delete a review
-  const deleteReview = useCallback(async (dishId, customerId = null) => {
-    const targetCustomerId = customerId || user?.CustomerID;
-    
-    if (!targetCustomerId) {
-      showToast('Unable to delete review', 'error');
-      return false;
-    }
+  const deleteReview = useCallback(
+    async (dishId, customerId = null) => {
+      const targetCustomerId = customerId || user?.$id;
 
-    try {
-      const existingReviews = getAllReviews();
-      const updatedReviews = existingReviews.filter(
-        review => !(review.DishID === parseInt(dishId) && review.CustomerID === parseInt(targetCustomerId))
-      );
+      if (!targetCustomerId) {
+        showToast("Unable to delete review", "error");
+        return false;
+      }
 
-      // Save to localStorage
-      localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(updatedReviews));
+      try {
+        // Find the review to delete
+        const reviewToDelete = reviews.find(
+          (review) =>
+            (review.DishID == dishId || review.dishId == dishId) &&
+            (review.CustomerID == targetCustomerId ||
+              review.userId == targetCustomerId)
+        );
 
-      // Update local state
-      setReviews(prev => prev.filter(
-        review => !(review.DishID === parseInt(dishId) && review.CustomerID === parseInt(targetCustomerId))
-      ));
+        if (!reviewToDelete) {
+          showToast("Review not found", "error");
+          return false;
+        }
 
-      // Trigger storage event for other components
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: STORAGE_KEYS.REVIEWS,
-        newValue: JSON.stringify(updatedReviews)
-      }));
+        // Delete from Appwrite
+        await appwriteService.deleteReview(reviewToDelete.ReviewID);
 
-      showToast('Review deleted successfully!', 'success');
-      return true;
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      showToast('Failed to delete review', 'error');
-      return false;
-    }
-  }, [user, showToast]);
+        // Update local state
+        setReviews((prev) =>
+          prev.filter(
+            (review) =>
+              !(
+                (review.DishID == dishId || review.dishId == dishId) &&
+                (review.CustomerID == targetCustomerId ||
+                  review.userId == targetCustomerId)
+              )
+          )
+        );
+
+        showToast("Review deleted successfully!", "success");
+        return true;
+      } catch (error) {
+        console.error("Error deleting review:", error);
+        showToast("Failed to delete review", "error");
+        return false;
+      }
+    },
+    [user, showToast, reviews]
+  );
 
   // Get existing review for a dish by current user
-  const getExistingReview = useCallback((dishId) => {
-    if (!user?.CustomerID) return null;
-    
-    return reviews.find(
-      review => review.DishID === parseInt(dishId) && review.CustomerID === user.CustomerID
-    ) || null;
-  }, [reviews, user]);
+  const getExistingReview = useCallback(
+    (dishId) => {
+      if (!user?.$id) return null;
+
+      return (
+        reviews.find(
+          (review) =>
+            (review.DishID == dishId || review.dishId == dishId) &&
+            (review.CustomerID == user.$id || review.userId == user.$id)
+        ) || null
+      );
+    },
+    [reviews, user]
+  );
 
   // Calculate average rating for a dish
-  const getAverageRating = useCallback((dishId) => {
-    const dishReviews = getReviewsForDishId(dishId);
-    if (dishReviews.length === 0) return null;
-    
-    const sum = dishReviews.reduce((acc, review) => acc + review.Rating, 0);
-    return (sum / dishReviews.length).toFixed(1);
-  }, [getReviewsForDishId]);
+  const getAverageRating = useCallback(
+    (dishId) => {
+      const dishReviews = getReviewsForDishId(dishId);
+      if (dishReviews.length === 0) return null;
+
+      const sum = dishReviews.reduce((acc, review) => acc + review.Rating, 0);
+      return (sum / dishReviews.length).toFixed(1);
+    },
+    [getReviewsForDishId]
+  );
 
   // Initialize reviews on mount and user change
   useEffect(() => {
     fetchReviews();
-  }, [fetchReviews]);
-
-  // Listen for storage changes from other tabs/components
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === STORAGE_KEYS.REVIEWS) {
-        fetchReviews();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, [fetchReviews]);
 
   const value = {
@@ -217,20 +252,18 @@ export const ReviewProvider = ({ children }) => {
     saveReview,
     deleteReview,
     getExistingReview,
-    getAverageRating
+    getAverageRating,
   };
 
   return (
-    <ReviewContext.Provider value={value}>
-      {children}
-    </ReviewContext.Provider>
+    <ReviewContext.Provider value={value}>{children}</ReviewContext.Provider>
   );
 };
 
 export const useReview = () => {
   const context = useContext(ReviewContext);
   if (!context) {
-    throw new Error('useReview must be used within a ReviewProvider');
+    throw new Error("useReview must be used within a ReviewProvider");
   }
   return context;
 };

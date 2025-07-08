@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   FaStar,
   FaTimes,
@@ -259,24 +259,27 @@ const MenuModal = ({ dish, onClose }) => {
                           <span className="text-[10px] sm:text-xs text-gray-500">
                             {reviewDate}
                           </span>
-                          {user && user.CustomerID === rev.CustomerID && (
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleEditReview(rev)}
-                                className="text-blue-500 hover:text-blue-700 transition-colors p-1"
-                                title="Edit review"
-                              >
-                                <FaEdit size={10} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteReview(rev)}
-                                className="text-red-500 hover:text-red-700 transition-colors p-1"
-                                title="Delete review"
-                              >
-                                <FaTrash size={10} />
-                              </button>
-                            </div>
-                          )}
+                          {user &&
+                            (user.CustomerID == rev.CustomerID ||
+                              user.$id == rev.CustomerID ||
+                              user.$id == rev.userId) && (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleEditReview(rev)}
+                                  className="text-blue-500 hover:text-blue-700 transition-colors p-1"
+                                  title="Edit review"
+                                >
+                                  <FaEdit size={10} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteReview(rev)}
+                                  className="text-red-500 hover:text-red-700 transition-colors p-1"
+                                  title="Delete review"
+                                >
+                                  <FaTrash size={10} />
+                                </button>
+                              </div>
+                            )}
                         </div>
                       </div>
 

@@ -4,10 +4,10 @@ import { IoArrowBack } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../Context/ToastContext";
 import { useNavigate } from "react-router-dom";
+import { useData } from "../Context/DataContext";
+import appwriteService from "../config/service";
 
 const ManageDishes = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const [dishes, setDishes] = useState([]);
   const [filteredDishes, setFilteredDishes] = useState([]);
   const [editingDish, setEditingDish] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,13 +15,12 @@ const ManageDishes = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchDishes();
-  }, []);
+  // Use DataContext for dishes
+  const { dishes, refreshData } = useData();
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = dishes.filter(dish =>
+      const filtered = dishes.filter((dish) =>
         dish.Name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredDishes(filtered);
@@ -30,40 +29,17 @@ const ManageDishes = () => {
     }
   }, [searchTerm, dishes]);
 
-  const fetchDishes = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/dishes`, {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
-        },
-      });
-      const data = await res.json();
-      setDishes(data);
-    } catch (err) {
-      console.error("Error fetching dishes:", err);
-      showToast("Failed to fetch dishes", "error");
-    }
-  };
-
   const handleDelete = async (id) => {
     setDeletingId(null); // Reset after confirmation
-    const confirmDelete = window.confirm("Are you sure you want to delete this dish?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this dish?"
+    );
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/admin/dishes/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
-        },
-      });
-
-      if (res.ok) {
-        showToast("Dish deleted successfully", "success");
-        fetchDishes();
-      } else {
-        showToast("Failed to delete dish", "error");
-      }
+      await appwriteService.deleteDish(id);
+      showToast("Dish deleted successfully", "success");
+      refreshData(); // Refresh data from DataContext
     } catch (err) {
       console.error("Delete error:", err);
       showToast("Error deleting dish", "error");
@@ -72,22 +48,20 @@ const ManageDishes = () => {
 
   const handleUpdate = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/admin/dishes/${editingDish.DishID}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("current_user"))?.token}`,
-        },
-        body: JSON.stringify(editingDish),
-      });
+      // Transform data to match Appwrite schema
+      const updateData = {
+        name: editingDish.Name,
+        description: editingDish.Description,
+        price: editingDish.Price,
+        imgUrl: editingDish.Image,
+        type: editingDish.Type,
+        isAvailable: editingDish.IsAvailable,
+      };
 
-      if (res.ok) {
-        showToast("Dish updated successfully", "success");
-        setEditingDish(null);
-        fetchDishes();
-      } else {
-        showToast("Failed to update dish", "error");
-      }
+      await appwriteService.updateDish(editingDish.DishID, updateData);
+      showToast("Dish updated successfully", "success");
+      setEditingDish(null);
+      refreshData(); // Refresh data from DataContext
     } catch (err) {
       console.error("Update error:", err);
       showToast("Error updating dish", "error");
@@ -102,8 +76,6 @@ const ManageDishes = () => {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-8">
-        
-
         <button
           onClick={() => navigate(-1)}
           className="absolute top-2 md:top-4 right-4 text-sm bg-red-500 hover:bg-red-600 text-white font-medium px-2 md:px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2"
@@ -133,7 +105,9 @@ const ManageDishes = () => {
       {filteredDishes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
           <FaUtensils className="text-6xl mb-4 text-gray-300" />
-          <p className="text-center text-lg">{searchTerm ? "No dishes match your search" : "No dishes available"}</p>
+          <p className="text-center text-lg">
+            {searchTerm ? "No dishes match your search" : "No dishes available"}
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
@@ -164,18 +138,28 @@ const ManageDishes = () => {
                       className="w-16 h-16 object-cover rounded-lg shadow-sm"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Image+Error';
+                        e.target.src =
+                          "https://via.placeholder.com/400x300?text=Image+Error";
                       }}
                     />
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{dish.Name}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">
+                    {dish.Name}
+                  </td>
                   <td className="px-4 py-3 capitalize">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                      {dish.Type === 'veg' ? '🌱 Veg' : '🍗 Non-Veg'}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        dish.Type === "veg"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {dish.Type === "veg" ? "🌱 Veg" : "🍗 Non-Veg"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-red-600 font-bold text-right">₹{dish.Price}</td>
+                  <td className="px-4 py-3 text-red-600 font-bold text-right">
+                    ₹{dish.Price}
+                  </td>
                   <td className="px-4 py-3 text-center flex justify-center items-center gap-4">
                     <motion.button
                       whileHover={{ scale: 1.2 }}
@@ -218,7 +202,8 @@ const ManageDishes = () => {
                 className="w-14 h-14 object-cover rounded-lg"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/400x300?text=Image+Error';
+                  e.target.src =
+                    "https://via.placeholder.com/400x300?text=Image+Error";
                 }}
               />
               <div>
@@ -227,9 +212,14 @@ const ManageDishes = () => {
               </div>
             </div>
             <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${dish.Type === 'veg' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                {dish.Type === 'veg' ? '🌱 Veg' : '🍗 Non-Veg'}
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  dish.Type === "veg"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {dish.Type === "veg" ? "🌱 Veg" : "🍗 Non-Veg"}
               </span>
               <div className="flex gap-2">
                 <button
@@ -270,48 +260,77 @@ const ManageDishes = () => {
                 ×
               </button>
 
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Edit Dish Details</h2>
-              <p className="text-gray-600 text-sm mb-6">Update your menu with accurate and up-to-date information</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Edit Dish Details
+              </h2>
+              <p className="text-gray-600 text-sm mb-6">
+                Update your menu with accurate and up-to-date information
+              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Dish Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dish Name
+                    </label>
                     <input
                       type="text"
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
                       value={editingDish.Name}
-                      onChange={(e) => setEditingDish({ ...editingDish, Name: e.target.value })}
+                      onChange={(e) =>
+                        setEditingDish({ ...editingDish, Name: e.target.value })
+                      }
                       placeholder="Dish Name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
                     <textarea
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
                       rows={3}
                       value={editingDish.Description}
-                      onChange={(e) => setEditingDish({ ...editingDish, Description: e.target.value })}
+                      onChange={(e) =>
+                        setEditingDish({
+                          ...editingDish,
+                          Description: e.target.value,
+                        })
+                      }
                       placeholder="Short description of the dish"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Price (₹)
+                      </label>
                       <input
                         type="number"
                         className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
                         value={editingDish.Price}
-                        onChange={(e) => setEditingDish({ ...editingDish, Price: e.target.value })}
+                        onChange={(e) =>
+                          setEditingDish({
+                            ...editingDish,
+                            Price: e.target.value,
+                          })
+                        }
                         placeholder="Price"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Type
+                      </label>
                       <select
                         className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
                         value={editingDish.Type}
-                        onChange={(e) => setEditingDish({ ...editingDish, Type: e.target.value })}
+                        onChange={(e) =>
+                          setEditingDish({
+                            ...editingDish,
+                            Type: e.target.value,
+                          })
+                        }
                       >
                         <option value="veg">🌱 Veg</option>
                         <option value="non-veg">🍗 Non-Veg</option>
@@ -322,12 +341,19 @@ const ManageDishes = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Image URL
+                    </label>
                     <input
                       type="text"
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
                       value={editingDish.Image}
-                      onChange={(e) => setEditingDish({ ...editingDish, Image: e.target.value })}
+                      onChange={(e) =>
+                        setEditingDish({
+                          ...editingDish,
+                          Image: e.target.value,
+                        })
+                      }
                       placeholder="Paste image URL here"
                     />
                   </div>
@@ -341,7 +367,8 @@ const ManageDishes = () => {
                       className="w-full h-40 object-cover rounded-lg border shadow-sm"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Invalid+Image+URL';
+                        e.target.src =
+                          "https://via.placeholder.com/400x300?text=Invalid+Image+URL";
                       }}
                     />
                   </div>
@@ -378,8 +405,13 @@ const ManageDishes = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Delete Dish</h3>
-              <p className="text-gray-600 mb-6">Are you sure you want to delete this dish? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Delete Dish
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this dish? This action cannot be
+                undone.
+              </p>
 
               <div className="flex justify-end gap-3">
                 <button

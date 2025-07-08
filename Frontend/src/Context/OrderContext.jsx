@@ -2,11 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 import emailjs from "@emailjs/browser";
-import {
-  getOrdersByCustomer,
-  createOrder,
-  clearCart,
-} from "../utils/localStorage";
+import appwriteService from "../config/service";
 
 const OrderContext = createContext();
 
@@ -15,47 +11,78 @@ export const OrderProvider = ({ children }) => {
   const { showToast } = useToast();
   const [orders, setOrders] = useState([]);
 
-  // ✅ Fetch orders from local storage
+  // ✅ Fetch orders from Appwrite
   const fetchOrders = async () => {
-    if (!user?.CustomerID) {
+    if (!user?.$id) {
       setOrders([]);
       return;
     }
 
     try {
-      const orderData = getOrdersByCustomer(user.CustomerID);
-      setOrders(orderData);
+      const orderData = await appwriteService.getOrdersByUser(user.$id);
+      // Transform the data to match expected format
+      const transformedOrders = orderData.map((order) => ({
+        ...order,
+        OrderID: order.$id,
+        OrderDate: order.orderedOn,
+        CustomerID: order.userId,
+        TotalAmount: order.totalAmount,
+        PaymentMethod: order.paymentMethod,
+        DeliveryAddress: "Address not stored", // Default since not in collection
+        Items: Array.isArray(order.items)
+          ? order.items.map((item) =>
+              typeof item === "string" ? JSON.parse(item) : item
+            )
+          : order.items,
+        Status: "Pending", // Default since not in collection
+      }));
+      setOrders(transformedOrders);
     } catch (error) {
       console.error("Order fetch error:", error);
       showToast("Error loading orders", "error");
+      setOrders([]); // Set empty array on error
     }
   };
 
-  // ✅ Place order with local storage and EmailJS
-  const placeOrder = (order) => {
-    if (!user?.CustomerID) {
+  // ✅ Place order with Appwrite and EmailJS
+  const placeOrder = async (order) => {
+    if (!user?.$id) {
       showToast("Please login to place order", "error");
       return null;
     }
 
     try {
-      // Create order in local storage
-      const newOrder = createOrder({
-        CustomerID: user.CustomerID,
-        TotalAmount: order.totalAmount,
-        PaymentMethod: order.paymentMethod,
-        DeliveryAddress: order.address,
-        Items: order.items,
-        CustomerName: user.Name,
-        CustomerEmail: user.Email,
-        CustomerPhone: user.Phone,
+      // Create order in Appwrite (only fields that exist in your collection)
+      const newOrder = await appwriteService.createOrder({
+        userId: user.$id,
+        totalAmount: order.totalAmount,
+        paymentMethod: order.paymentMethod,
+        items: order.items.map((item) => JSON.stringify(item)), // Convert each item to string for String[] array
       });
 
       // Clear cart after successful order
-      clearCart(user.CustomerID);
+      await appwriteService.clearCart(user.$id);
 
-      // Update local state
-      setOrders((prev) => [newOrder, ...prev]);
+      // Update local state with transformed order
+      const transformedOrder = {
+        ...newOrder,
+        OrderID: newOrder.$id,
+        OrderDate: newOrder.orderedOn,
+        CustomerID: newOrder.userId,
+        TotalAmount: newOrder.totalAmount,
+        PaymentMethod: newOrder.paymentMethod,
+        DeliveryAddress: order.address, // Use from original order data
+        Items: Array.isArray(newOrder.items)
+          ? newOrder.items.map((item) =>
+              typeof item === "string" ? JSON.parse(item) : item
+            )
+          : newOrder.items,
+        Status: "Pending", // Default status
+        CustomerName: user.name || user.Name,
+        CustomerEmail: user.email || user.Email,
+        CustomerPhone: user.phone || user.Phone,
+      };
+      setOrders((prev) => [transformedOrder, ...prev]);
 
       // ✅ Send email via EmailJS
       emailjs
@@ -63,17 +90,20 @@ export const OrderProvider = ({ children }) => {
           import.meta.env.VITE_EMAILJS_SERVICE_ID,
           import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
           {
-            order_id: newOrder.OrderID,
-            created_at: new Date(newOrder.OrderDate).toLocaleString("en-IN", {
-              dateStyle: "long",
-              timeStyle: "short",
-            }),
-            payment_method: newOrder.PaymentMethod,
-            address: newOrder.DeliveryAddress,
-            total: newOrder.TotalAmount,
+            order_id: transformedOrder.OrderID,
+            created_at: new Date(transformedOrder.OrderDate).toLocaleString(
+              "en-IN",
+              {
+                dateStyle: "long",
+                timeStyle: "short",
+              }
+            ),
+            payment_method: transformedOrder.PaymentMethod,
+            address: transformedOrder.DeliveryAddress,
+            total: transformedOrder.TotalAmount,
             year: new Date().getFullYear(),
-            user_email: user?.Email,
-            items: newOrder.Items,
+            user_email: user?.email || user?.Email,
+            items: transformedOrder.Items,
           },
           import.meta.env.VITE_EMAILJS_PUBLIC_KEY
         )
@@ -85,7 +115,7 @@ export const OrderProvider = ({ children }) => {
         });
 
       showToast("Order placed successfully! Email sent.", "success");
-      return newOrder;
+      return transformedOrder;
     } catch (error) {
       console.error("Order placement error:", error);
       showToast("Failed to place order", "error");
@@ -94,7 +124,7 @@ export const OrderProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (user?.CustomerID) {
+    if (user?.$id) {
       fetchOrders();
     } else {
       setOrders([]);

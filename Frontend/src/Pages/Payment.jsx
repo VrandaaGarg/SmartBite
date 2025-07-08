@@ -38,7 +38,7 @@ const Payment = () => {
         })),
       };
 
-      const placedOrder = placeOrder(newOrder);
+      const placedOrder = await placeOrder(newOrder);
       if (placedOrder) {
         clearCart();
         navigate("/order-success", { state: { order: placedOrder } });

@@ -13,8 +13,8 @@ import {
 } from "react-icons/fa";
 import { IoArrowBack } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import { getAllOrders, updateOrder } from "../utils/adminUtils";
 import { useToast } from "../Context/ToastContext";
+import appwriteService from "../config/service";
 
 const ViewOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -25,16 +25,82 @@ const ViewOrders = () => {
   const { showToast } = useToast();
 
   useEffect(() => {
-    try {
-      const orderData = getAllOrders();
-      const sortedOrders = [...orderData].sort((a, b) => b.OrderID - a.OrderID);
-      setOrders(sortedOrders);
-      setFilteredOrders(sortedOrders);
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-      showToast("Failed to load orders", "error");
-    }
-  }, []);
+    const fetchOrders = async () => {
+      try {
+        const orderData = await appwriteService.getAllOrders();
+        const userData = await appwriteService.getAllUsers();
+        console.log(orderData);
+
+        // Transform data to match expected format and fetch user info
+        const transformedOrders = orderData.map((order) => {
+          // Find user info for this order
+          const user = userData.find((u) => u.$id === order.userId);
+
+          return {
+            ...order,
+            OrderID: order.$id,
+            OrderDate: order.orderedOn
+              ? (() => {
+                  try {
+                    const date = new Date(order.orderedOn);
+                    if (isNaN(date.getTime())) {
+                      return order.orderedOn; // Return original if parsing fails
+                    }
+                    return (
+                      date.toLocaleDateString("en-IN", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      }) +
+                      " " +
+                      date.toLocaleTimeString("en-IN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    );
+                  } catch (error) {
+                    return order.orderedOn; // Return original if error
+                  }
+                })()
+              : "Date not available",
+            CustomerID: order.userId,
+            TotalAmount: order.totalAmount,
+            PaymentMethod: order.paymentMethod,
+            CustomerAddress: user
+              ? `${user.houseNo || ""} ${user.street || ""} ${
+                  user.landmark || ""
+                } ${user.city || ""} ${user.state || ""} ${
+                  user.pincode || ""
+                }`.trim()
+              : "Address not available",
+            Items: Array.isArray(order.items)
+              ? order.items.map((item) =>
+                  typeof item === "string" ? JSON.parse(item) : item
+                )
+              : order.items || [],
+            Status: "Pending", // Default since not in collection
+            CustomerName: user ? user.name || user.Name : "Unknown Customer",
+            CustomerEmail: user ? user.email || user.Email : "Not available",
+            CustomerPhone: user ? user.phone || user.Phone : "Not available",
+          };
+        });
+
+        console.log("orders", transformedOrders);
+
+        const sortedOrders = [...transformedOrders].sort((a, b) =>
+          b.OrderID.localeCompare(a.OrderID)
+        );
+        setOrders(sortedOrders);
+        setFilteredOrders(sortedOrders);
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+        showToast("Failed to load orders", "error");
+      }
+    };
+
+    fetchOrders();
+  }, [showToast]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -51,14 +117,26 @@ const ViewOrders = () => {
   const filterOrders = (searchTerm, dateStr) => {
     const filtered = orders.filter((order) => {
       const matchesSearch =
-        order.Customer.Name.toLowerCase().includes(searchTerm) ||
-        order.Customer.Email.toLowerCase().includes(searchTerm);
+        order.CustomerName.toLowerCase().includes(searchTerm) ||
+        order.CustomerEmail.toLowerCase().includes(searchTerm) ||
+        order.OrderID.toLowerCase().includes(searchTerm);
+
       const matchesDate = dateStr
-        ? new Date(order.CreatedAt).toLocaleDateString() ===
-          new Date(dateStr).toLocaleDateString()
+        ? (() => {
+            try {
+              // Use the original orderedOn field for date comparison
+              const orderDate = new Date(order.orderedOn);
+              const filterDate = new Date(dateStr);
+              return orderDate.toDateString() === filterDate.toDateString();
+            } catch (error) {
+              return false;
+            }
+          })()
         : true;
+
       return matchesSearch && matchesDate;
     });
+    console.log(filtered);
     setFilteredOrders(filtered);
   };
 
@@ -126,7 +204,7 @@ const ViewOrders = () => {
                 <div className="text-sm text-gray-700 flex flex-col md:flex-row md:items-center gap-3">
                   <span className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
                     <FaClock className="text-red-500" />
-                    {new Date(order.CreatedAt).toLocaleString()}
+                    {new Date(order.OrderDate).toLocaleString()}
                   </span>
                   <span className="flex items-center gap-2 font-bold text-base bg-yellow-50 px-3 py-1 rounded-full text-yellow-700">
                     <FaRupeeSign /> ₹{order.TotalAmount}
@@ -144,23 +222,23 @@ const ViewOrders = () => {
                   </h3>
                   <p className="flex items-center gap-2">
                     <FaUserCircle className="text-red-400" />
-                    <span className="font-medium">{order.Customer.Name}</span>
+                    <span className="font-medium">{order.CustomerName}</span>
                     <span className="text-xs text-gray-500">
-                      (ID: {order.Customer.CustomerID})
+                      (ID: {order.CustomerID})
                     </span>
                   </p>
                   <p className="flex items-center gap-2">
                     <FaEnvelope className="text-red-400" />{" "}
-                    {order.Customer.Email}
+                    {order.CustomerEmail}
                   </p>
                   <p className="flex items-center gap-2">
                     <FaPhone className="text-red-400" />{" "}
-                    {order.Customer.Phone || "N/A"}
+                    {order.CustomerPhone || "N/A"}
                   </p>
                   <p className="flex items-start gap-2">
                     <FaMapMarkerAlt className="text-red-400 mt-1" />
                     <span className="text-gray-600">
-                      {order.Customer.Address || "No address provided"}
+                      {order.CustomerAddress || "No address provided"}
                     </span>
                   </p>
                 </div>
@@ -170,22 +248,23 @@ const ViewOrders = () => {
                     Ordered Dishes
                   </h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-red-200 scrollbar-track-gray-100">
-                    {order.Dishes.map((dish, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between bg-gradient-to-r from-yellow-50 to-white border border-yellow-100 rounded-lg px-4 py-2.5 text-gray-700 shadow-sm"
-                      >
-                        <span className="font-medium">
-                          {dish.Name}{" "}
-                          <span className="text-gray-400">
-                            ×{dish.Quantity}
+                    {order.Items &&
+                      order.Items.map((dish, idx) => (
+                        <div
+                          key={idx}
+                          className="flex justify-between bg-gradient-to-r from-yellow-50 to-white border border-yellow-100 rounded-lg px-4 py-2.5 text-gray-700 shadow-sm"
+                        >
+                          <span className="font-medium">
+                            {dish.name}{" "}
+                            <span className="text-gray-400">
+                              ×{dish.quantity}
+                            </span>
                           </span>
-                        </span>
-                        <span className="text-red-500 font-semibold">
-                          ₹{dish.Total}
-                        </span>
-                      </div>
-                    ))}
+                          <span className="text-red-500 font-semibold">
+                            ₹{dish.price * dish.quantity}
+                          </span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>

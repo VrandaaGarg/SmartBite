@@ -11,33 +11,22 @@ import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
 import MenuModal from "../Components/MenuModal";
-import { getAllDishes } from "../utils/localStorage";
-import { dishes as localDishes, menus as localMenus } from "../Data/dishes";
+import { useData } from "../Context/DataContext";
 
 const Menu = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [filter, setFilter] = useState({ type: "all", maxPrice: 1000 });
-  const [dishes, setDishes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth(); // 👈 your user context
+  const { user } = useAuth();
   const [selectedDish, setSelectedDish] = useState(null);
-  const [menus, setMenus] = useState([]);
 
-  useEffect(() => {
-    // Use local menu data
-    setMenus(localMenus);
-  }, []);
-
-  useEffect(() => {
-    // Use local dishes data
-    setDishes(localDishes);
-  }, []);
+  // Use DataContext for menus and dishes
+  const { menus, dishes, loading: dataLoading } = useData();
 
   // Animation effect when component mounts or filters change
   useEffect(() => {
@@ -46,7 +35,17 @@ const Menu = () => {
     return () => clearTimeout(timer);
   }, [selectedMenuId, filter, searchQuery]);
 
-  const getVegOrNonVeg = (dish) => dish.Type; // Use directly from DB
+  // Show loading state while data is being fetched
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddToCart = (dish) => {
     if (!user) {

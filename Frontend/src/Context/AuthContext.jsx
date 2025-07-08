@@ -4,30 +4,67 @@ import {
   useState,
   useCallback,
   useRef,
+  useEffect,
 } from "react";
 import { useToast } from "./ToastContext";
-import {
-  getUserByEmail,
-  createUser,
-  updateUser,
-  STORAGE_KEYS,
-  getFromStorage,
-  setToStorage,
-  initializeApp,
-} from "../utils/localStorage";
+import appwriteAuth from "../config/appwriteauth";
+import appwriteService from "../config/service";
 
 const AuthContext = createContext();
+
+// Local storage keys for current user only
+const STORAGE_KEYS = {
+  CURRENT_USER: "current_user",
+};
+
+const getFromStorage = (key) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : null;
+  } catch (error) {
+    console.error(`Error getting ${key} from localStorage:`, error);
+    return null;
+  }
+};
+
+const setToStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.error(`Error setting ${key} to localStorage:`, error);
+    return false;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const { showToast } = useToast();
   const [user, setUser] = useState(() => {
-    // Initialize app data on first load
-    initializeApp();
     return getFromStorage(STORAGE_KEYS.CURRENT_USER);
   });
+  const [loading, setLoading] = useState(true);
 
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
+
+  // Check for current user on app load
+  useEffect(() => {
+    const checkCurrentUser = async () => {
+      try {
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
+      } catch (error) {
+        console.error("Error checking current user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkCurrentUser();
+  }, []);
 
   const showSingleToast = useCallback(
     (message, type) => {
@@ -51,7 +88,7 @@ export const AuthProvider = ({ children }) => {
     [showToast]
   );
 
-  // 🔐 Signup with local storage
+  // 🔐 Signup with Appwrite
   const signup = async ({
     name,
     email,
@@ -65,77 +102,77 @@ export const AuthProvider = ({ children }) => {
     pincode,
   }) => {
     try {
-      // Check if user already exists
-      const existingUser = getUserByEmail(email);
-      if (existingUser) {
-        showSingleToast("Email already registered", "error");
-        return { success: false, message: "Email already registered" };
-      }
-
-      // Create new user
-      const newUser = createUser({
-        Name: name,
-        Email: email,
-        Phone: phone,
-        Password: password, // In real app, this would be hashed
-        HouseNo: houseNo,
-        Street: street,
-        Landmark: landmark,
-        City: city,
-        State: state,
-        Pincode: pincode,
+      // Create account in Appwrite (includes auth and user document)
+      const result = await appwriteAuth.createAccount({
+        name,
+        email,
+        phone,
+        password,
+        houseNo,
+        street,
+        landmark,
+        city,
+        state,
+        pincode,
       });
 
-      showSingleToast("Account created successfully", "success");
+      if (result.success) {
+        // Get the current user after signup
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
 
-      // Auto-login the new user
-      return await login(email, password);
+        showSingleToast("Account created successfully", "success");
+        return { success: true };
+      }
     } catch (err) {
-      showSingleToast("Signup failed", "error");
+      console.error("Signup error:", err);
+      showSingleToast(err.message || "Signup failed", "error");
       return { success: false, message: err.message };
     }
   };
 
-  // 🔐 Login with local storage
+  // 🔐 Login with Appwrite
   const login = async (email, password) => {
     try {
-      // Find user by email
-      const user = getUserByEmail(email);
+      // Login with Appwrite
+      const result = await appwriteAuth.login({ email, password });
 
-      if (!user) {
-        showSingleToast("Invalid email or password", "error");
-        return { success: false, message: "Invalid email or password" };
+      if (result.success) {
+        // Get the current user after login
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
+
+        showSingleToast("Logged in successfully", "success");
+        return { success: true };
       }
-
-      // Simple password check (in real app, use proper hashing)
-      if (user.Password !== password) {
-        showSingleToast("Invalid email or password", "error");
-        return { success: false, message: "Invalid email or password" };
-      }
-
-      // Create user session
-      const fullUser = {
-        ...user,
-        isAdmin: user.IsAdmin === 1,
-        token: `local_token_${user.CustomerID}_${Date.now()}`, // Mock token
-      };
-
-      setUser(fullUser);
-      setToStorage(STORAGE_KEYS.CURRENT_USER, fullUser);
-
-      showSingleToast("Logged in successfully", "success");
-      return { success: true };
     } catch (err) {
-      showSingleToast("Login failed", "error");
+      console.error("Login error:", err);
+      showSingleToast(err.message || "Login failed", "error");
       return { success: false, message: err.message };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToStorage(STORAGE_KEYS.CURRENT_USER, null);
-    showSingleToast("Logged out successfully", "success");
-    return { success: true };
+  const logout = async () => {
+    try {
+      await appwriteAuth.logout();
+      setUser(null);
+      setToStorage(STORAGE_KEYS.CURRENT_USER, null);
+      showSingleToast("Logged out successfully", "success");
+      return { success: true };
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Even if Appwrite logout fails, clear local state
+      setUser(null);
+      setToStorage(STORAGE_KEYS.CURRENT_USER, null);
+      showSingleToast("Logged out successfully", "success");
+      return { success: true };
+    }
   };
 
   // Update user profile
@@ -146,9 +183,9 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: "Not authenticated" };
       }
 
-      const updatedUser = updateUser(user.CustomerID, updates);
-      if (updatedUser) {
-        const fullUser = { ...user, ...updatedUser };
+      const result = await appwriteAuth.updateProfile(user.$id, updates);
+      if (result.success) {
+        const fullUser = { ...user, ...result.user };
         setUser(fullUser);
         setToStorage(STORAGE_KEYS.CURRENT_USER, fullUser);
         showSingleToast("Profile updated successfully", "success");
@@ -158,14 +195,15 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: "Update failed" };
       }
     } catch (err) {
-      showSingleToast("Profile update failed", "error");
+      console.error("Profile update error:", err);
+      showSingleToast(err.message || "Profile update failed", "error");
       return { success: false, message: err.message };
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, login, signup, logout, updateProfile }}
+      value={{ user, login, signup, logout, updateProfile, loading }}
     >
       {children}
     </AuthContext.Provider>

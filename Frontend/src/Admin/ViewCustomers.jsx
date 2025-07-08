@@ -12,7 +12,8 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
-import { getAllUsers, promoteToAdmin, demoteAdmin } from "../utils/adminUtils";
+import { useAuth } from "../Context/AuthContext";
+import appwriteService from "../config/service";
 
 const ViewCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -21,8 +22,10 @@ const ViewCustomers = () => {
   const [actionType, setActionType] = useState("");
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const user = JSON.parse(localStorage.getItem("current_user"));
-  const isSuperAdmin = user?.Email === "vrandacodz@gmail.com";
+  const { user } = useAuth();
+  const isSuperAdmin =
+    user?.email === "vrandacodz@gmail.com" ||
+    user?.Email === "vrandacodz@gmail.com";
 
   const handleAdminChange = async (email, makeAdmin = true) => {
     try {
@@ -32,23 +35,20 @@ const ViewCustomers = () => {
         return;
       }
 
-      const result = makeAdmin
-        ? promoteToAdmin(customer.CustomerID)
-        : demoteAdmin(customer.CustomerID);
+      // Update user admin status in Appwrite
+      await appwriteService.updateUser(customer.CustomerID, {
+        isAdmin: makeAdmin,
+      });
 
-      if (result.success) {
-        showToast(
-          makeAdmin ? "User promoted to admin" : "Admin privileges removed",
-          "success"
-        );
-        setCustomers((prev) =>
-          prev.map((c) =>
-            c.Email === email ? { ...c, IsAdmin: makeAdmin ? 1 : 0 } : c
-          )
-        );
-      } else {
-        showToast(result.error || "Failed to update admin status", "error");
-      }
+      showToast(
+        makeAdmin ? "User promoted to admin" : "Admin privileges removed",
+        "success"
+      );
+      setCustomers((prev) =>
+        prev.map((c) =>
+          c.Email === email ? { ...c, IsAdmin: makeAdmin ? 1 : 0 } : c
+        )
+      );
     } catch (err) {
       console.error(err);
       showToast("Error updating admin status", "error");
@@ -63,14 +63,28 @@ const ViewCustomers = () => {
   };
 
   useEffect(() => {
-    try {
-      const userData = getAllUsers();
-      setCustomers(userData);
-    } catch (err) {
-      console.error("Failed to fetch customers:", err);
-      showToast("Failed to load customers", "error");
-    }
-  }, []);
+    const fetchCustomers = async () => {
+      try {
+        const userData = await appwriteService.getAllUsers();
+        // Transform data to match expected format
+        const transformedUsers = userData.map((user) => ({
+          ...user,
+          CustomerID: user.$id,
+          Name: user.name || user.Name,
+          Email: user.email || user.Email,
+          Phone: user.phone || user.Phone,
+          IsAdmin: user.isAdmin ? 1 : 0,
+          CreatedAt: user.createdAt || user.$createdAt,
+        }));
+        setCustomers(transformedUsers);
+      } catch (err) {
+        console.error("Failed to fetch customers:", err);
+        showToast("Failed to load customers", "error");
+      }
+    };
+
+    fetchCustomers();
+  }, [showToast]);
 
   const filtered = customers.filter(
     (cust) =>

@@ -29,12 +29,17 @@ const Payment = () => {
       const newOrder = {
         totalAmount,
         paymentMethod,
-        address: `${user.HouseNo}, ${user.Street}, ${user.Landmark}, ${user.City}, ${user.State} - ${user.Pincode}`,
+        address: `${user.houseNo ? user.houseNo : ""} ${
+          user.street ? ", " + user.street : ""
+        }${user.landmark ? ", " + user.landmark : ""}${
+          user.city ? ", " + user.city : ""
+        } ${user.state ? ", " + user.state : ""} - ${user.pincode}`,
         items: cart.map((item) => ({
           name: item.name,
           quantity: item.quantity,
           price: parseFloat(item.price),
           DishID: item.DishID,
+          image: item.image,
         })),
       };
 
@@ -67,9 +72,16 @@ const Payment = () => {
             key={item.CartID || item.DishID}
             className="flex justify-between py-2 border-b text-gray-700"
           >
-            <span>
-              {item.name} × {item.quantity}
-            </span>
+            <div className="flex gap-3 items-center">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-16 h-16 object-cover"
+              />
+              <span>
+                {item.name} × {item.quantity}
+              </span>
+            </div>
             <span>₹{item.price * item.quantity}</span>
           </div>
         ))}
@@ -83,8 +95,11 @@ const Payment = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Delivery Address:</h3>
         <p className="text-gray-600">
-          {user?.HouseNo}, {user?.Street}, {user?.Landmark}, {user?.City},{" "}
-          {user?.State} - {user?.Pincode}
+          {user?.houseNo ? user?.houseNo + "," : ""}
+          {user?.street ? user?.street + "," : ""}
+          {user?.landmark ? user?.landmark + "," : ""}
+          {user?.city ? user?.city + "," : ""} {user?.state}
+          {user?.pincode ? " - " + user?.pincode : ""}
         </p>
       </div>
 

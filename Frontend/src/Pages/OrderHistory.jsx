@@ -24,6 +24,7 @@ const OrderHistory = () => {
   const { getExistingReview } = useReview();
   const [isLoaded, setIsLoaded] = useState(false);
   const [reviewModal, setReviewModal] = useState(null);
+  console.log("orders", orders);
 
   useEffect(() => {
     if (user?.CustomerID) {
@@ -288,8 +289,7 @@ const OrderHistory = () => {
                       Address
                     </h4>
                     <p className="text-gray-600 leading-relaxed">
-                      {user?.HouseNo}, {user?.Street}, {user?.Landmark},{" "}
-                      {user?.City}, {user?.State} - {user?.Pincode}
+                      {order.DeliveryAddress}
                     </p>
                   </div>
                   <div className="bg-gray-50 p-2 md:p-4 rounded-lg border border-gray-100">

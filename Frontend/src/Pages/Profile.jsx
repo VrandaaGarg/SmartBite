@@ -20,14 +20,14 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.Name || "",
-    phone: user?.Phone || "",
-    houseNo: user?.HouseNo || "",
-    street: user?.Street || "",
-    landmark: user?.Landmark || "",
-    city: user?.City || "",
-    state: user?.State || "",
-    pincode: user?.Pincode || "",
+    name: user?.name || "",
+    phone: user?.phone || "",
+    houseNo: user?.houseNo || "",
+    street: user?.street || "",
+    landmark: user?.landmark || "",
+    city: user?.city || "",
+    state: user?.state || "",
+    pincode: user?.pincode || "",
   });
 
   const fullAddress = `${formData.houseNo}, ${formData.street}${
@@ -114,7 +114,7 @@ const Profile = () => {
           <div className="flex items-center gap-2">
             <FaEnvelope className="text-gray-500" />
             <input
-              value={user.Email}
+              value={user.email}
               disabled
               className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-500 border"
             />

@@ -28,13 +28,14 @@ export const OrderProvider = ({ children }) => {
         CustomerID: order.userId,
         TotalAmount: order.totalAmount,
         PaymentMethod: order.paymentMethod,
-        DeliveryAddress: "Address not stored", // Default since not in collection
+        DeliveryAddress: order.address || "Address not available", // Use from database
         Items: Array.isArray(order.items)
           ? order.items.map((item) =>
               typeof item === "string" ? JSON.parse(item) : item
             )
           : order.items,
         Status: "Pending", // Default since not in collection
+        ImageUrl: order.imgUrl || "", // Add image URL field
       }));
       setOrders(transformedOrders);
     } catch (error) {
@@ -52,12 +53,14 @@ export const OrderProvider = ({ children }) => {
     }
 
     try {
-      // Create order in Appwrite (only fields that exist in your collection)
+      // Create order in Appwrite (including new address and imgUrl fields)
       const newOrder = await appwriteService.createOrder({
         userId: user.$id,
         totalAmount: order.totalAmount,
         paymentMethod: order.paymentMethod,
         items: order.items.map((item) => JSON.stringify(item)), // Convert each item to string for String[] array
+        address: order.address || "", // Add address field
+        imgUrl: order.imgUrl || "", // Add imgUrl field
       });
 
       // Clear cart after successful order
@@ -71,7 +74,7 @@ export const OrderProvider = ({ children }) => {
         CustomerID: newOrder.userId,
         TotalAmount: newOrder.totalAmount,
         PaymentMethod: newOrder.paymentMethod,
-        DeliveryAddress: order.address, // Use from original order data
+        DeliveryAddress: newOrder.address || order.address, // Use from database or fallback to original
         Items: Array.isArray(newOrder.items)
           ? newOrder.items.map((item) =>
               typeof item === "string" ? JSON.parse(item) : item
@@ -81,6 +84,7 @@ export const OrderProvider = ({ children }) => {
         CustomerName: user.name || user.Name,
         CustomerEmail: user.email || user.Email,
         CustomerPhone: user.phone || user.Phone,
+        ImageUrl: newOrder.imgUrl || "", // Add image URL field
       };
       setOrders((prev) => [transformedOrder, ...prev]);
 

@@ -67,13 +67,15 @@ const ViewOrders = () => {
             CustomerID: order.userId,
             TotalAmount: order.totalAmount,
             PaymentMethod: order.paymentMethod,
-            CustomerAddress: user
-              ? `${user.houseNo || ""} ${user.street || ""} ${
-                  user.landmark || ""
-                } ${user.city || ""} ${user.state || ""} ${
-                  user.pincode || ""
-                }`.trim()
-              : "Address not available",
+            CustomerAddress:
+              order.address ||
+              (user
+                ? `${user.houseNo || ""} ${user.street || ""} ${
+                    user.landmark || ""
+                  } ${user.city || ""} ${user.state || ""} ${
+                    user.pincode || ""
+                  }`.trim()
+                : "Address not available"),
             Items: Array.isArray(order.items)
               ? order.items.map((item) =>
                   typeof item === "string" ? JSON.parse(item) : item
@@ -83,6 +85,7 @@ const ViewOrders = () => {
             CustomerName: user ? user.name || user.Name : "Unknown Customer",
             CustomerEmail: user ? user.email || user.Email : "Not available",
             CustomerPhone: user ? user.phone || user.Phone : "Not available",
+            ImageUrl: order.imgUrl || "", // Add image URL field
           };
         });
 

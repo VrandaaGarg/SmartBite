@@ -1,50 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../Context/CartContext";
-import { FaSearch, FaFilter, FaLeaf, FaDrumstickBite, FaUtensils } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFilter,
+  FaLeaf,
+  FaDrumstickBite,
+  FaUtensils,
+} from "react-icons/fa";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
 import MenuModal from "../Components/MenuModal";
-
+import { useData } from "../Context/DataContext";
 
 const Menu = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [filter, setFilter] = useState({ type: "all", maxPrice: 1000 });
-  const [dishes, setDishes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();// 👈 your user context
+  const { user } = useAuth();
   const [selectedDish, setSelectedDish] = useState(null);
-  const [menus, setMenus] = useState([]);
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/menus`)
-      .then((res) => res.json())
-      .then((data) => setMenus(data))
-      .catch((err) => {
-        console.error("Error fetching menus:", err);
-        showToast("Failed to load menu categories!", "error");
-      });
-  }, []);
-
-
-
-
-  useEffect(() => {
-    fetch(`${API_URL}/api/dishes`)
-      .then((res) => res.json())
-      .then((data) => setDishes(data))
-      .catch((err) => {
-        console.error("Error fetching dishes:", err);
-        showToast("Failed to load dishes!", "error");
-      });
-  }, []);
-
+  // Use DataContext for menus and dishes
+  const { menus, dishes, loading: dataLoading } = useData();
 
   // Animation effect when component mounts or filters change
   useEffect(() => {
@@ -53,7 +35,17 @@ const Menu = () => {
     return () => clearTimeout(timer);
   }, [selectedMenuId, filter, searchQuery]);
 
-  const getVegOrNonVeg = (dish) => dish.Type; // Use directly from DB
+  // Show loading state while data is being fetched
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddToCart = (dish) => {
     if (!user) {
@@ -67,13 +59,13 @@ const Menu = () => {
 
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.MenuID === selectedMenuId : true;
-    const matchType =
-      filter.type === "all" || dish.Type === filter.type;
+    const matchType = filter.type === "all" || dish.Type === filter.type;
 
     const matchPrice = dish.Price <= filter.maxPrice;
-    const matchSearch = searchQuery === "" ||
+    const matchSearch =
+      searchQuery === "" ||
       dish.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dish.Description.toLowerCase().includes(searchQuery.toLowerCase())
+      dish.Description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchMenu && matchType && matchPrice && matchSearch;
   });
 
@@ -86,9 +78,8 @@ const Menu = () => {
   ];
 
   const currentCategoryName = selectedMenuId
-    ? menus.find(menu => menu.MenuID === selectedMenuId)?.Name
+    ? menus.find((menu) => menu.MenuID === selectedMenuId)?.Name
     : "All Items";
-
 
   return (
     <div className="py-4 md:py-8 px-4 max-w-7xl mx-auto">
@@ -127,10 +118,11 @@ const Menu = () => {
         <div className="flex gap-2 min-w-max">
           <button
             onClick={() => setSelectedMenuId(null)}
-            className={`rounded-full px-3 md:px-6 py-2 md:py-3 font-semibold border-2 flex items-center gap-2 ${selectedMenuId === null
-              ? "bg-red-600 text-white border-red-600 shadow-md"
-              : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-              } transition-all duration-200`}
+            className={`rounded-full px-3 md:px-6 py-2 md:py-3 font-semibold border-2 flex items-center gap-2 ${
+              selectedMenuId === null
+                ? "bg-red-600 text-white border-red-600 shadow-md"
+                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+            } transition-all duration-200`}
           >
             <FaUtensils className="" />
             All Categories
@@ -139,17 +131,21 @@ const Menu = () => {
           {menus.map((menu) => (
             <button
               key={menu.MenuID}
-              onClick={() => setSelectedMenuId(menu.MenuID === selectedMenuId ? null : menu.MenuID)}
-              className={`rounded-full px-3 md:px-6 py-2 md:py-3  font-semibold border-2 flex items-center gap-2 ${selectedMenuId === menu.MenuID
+              onClick={() =>
+                setSelectedMenuId(
+                  menu.MenuID === selectedMenuId ? null : menu.MenuID
+                )
+              }
+              className={`rounded-full px-3 md:px-6 py-2 md:py-3  font-semibold border-2 flex items-center gap-2 ${
+                selectedMenuId === menu.MenuID
                   ? "bg-red-600 text-white border-red-600 shadow-md"
                   : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                } transition-all duration-200`}
+              } transition-all duration-200`}
             >
               <span className="">{menu.Icon}</span>
               {menu.Name}
             </button>
           ))}
-
         </div>
       </div>
 
@@ -159,36 +155,55 @@ const Menu = () => {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Diet Type Filter */}
             <div className="flex-1">
-              <h3 className="text-sm font-semibold mb-2 text-gray-700">Diet Type</h3>
+              <h3 className="text-sm font-semibold mb-2 text-gray-700">
+                Diet Type
+              </h3>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "all" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "all"
-                    ? "bg-red-100 text-red-800 font-medium"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "all"
+                      ? "bg-red-100 text-red-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
-                  <FaUtensils className={filter.type === "all" ? "text-red-600" : "text-gray-500"} />
+                  <FaUtensils
+                    className={
+                      filter.type === "all" ? "text-red-600" : "text-gray-500"
+                    }
+                  />
                   All
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "veg"
-                    ? "bg-green-100 text-green-800 font-medium"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "veg"
+                      ? "bg-green-100 text-green-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
-                  <FaLeaf className={filter.type === "veg" ? "text-green-600" : "text-gray-500"} />
+                  <FaLeaf
+                    className={
+                      filter.type === "veg" ? "text-green-600" : "text-gray-500"
+                    }
+                  />
                   Vegetarian
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "non-veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${filter.type === "non-veg"
-                    ? "bg-yellow-100 text-yellow-800 font-medium"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    filter.type === "non-veg"
+                      ? "bg-yellow-100 text-yellow-800 font-medium"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
-                  <FaDrumstickBite className={filter.type === "non-veg" ? "text-yellow-600" : "text-gray-500"} />
+                  <FaDrumstickBite
+                    className={
+                      filter.type === "non-veg"
+                        ? "text-yellow-600"
+                        : "text-gray-500"
+                    }
+                  />
                   Non-Vegetarian
                 </button>
               </div>
@@ -196,16 +211,21 @@ const Menu = () => {
 
             {/* Price Filter */}
             <div className="flex-1">
-              <h3 className="text-sm font-semibold mb-2 text-gray-700">Price Range</h3>
+              <h3 className="text-sm font-semibold mb-2 text-gray-700">
+                Price Range
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {priceRanges.map((range) => (
                   <button
                     key={range.label}
-                    onClick={() => setFilter((f) => ({ ...f, maxPrice: range.max }))}
-                    className={`px-4 py-2 rounded-full transition-all ${filter.maxPrice === range.max
-                      ? "bg-red-100 text-red-800 font-medium"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                    onClick={() =>
+                      setFilter((f) => ({ ...f, maxPrice: range.max }))
+                    }
+                    className={`px-4 py-2 rounded-full transition-all ${
+                      filter.maxPrice === range.max
+                        ? "bg-red-100 text-red-800 font-medium"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
                     {range.label}
                   </button>
@@ -224,8 +244,12 @@ const Menu = () => {
             alt="No results"
             className="w-24 h-24 mx-auto mb-4 opacity-30"
           />
-          <h3 className="text-xl font-semibold text-gray-500 mb-2">No dishes found</h3>
-          <p className="text-gray-500">Try adjusting your filters or search query</p>
+          <h3 className="text-xl font-semibold text-gray-500 mb-2">
+            No dishes found
+          </h3>
+          <p className="text-gray-500">
+            Try adjusting your filters or search query
+          </p>
           <button
             onClick={() => {
               setSelectedMenuId(null);
@@ -244,9 +268,11 @@ const Menu = () => {
         {filteredDishes.map((dish) => (
           <div
             key={dish.DishID}
-
-            className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-              } group hover:-translate-y-1`}
+            className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform ${
+              animateIn
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            } group hover:-translate-y-1`}
             style={{
               transitionDelay: `${Math.random() * 0.3}s`,
             }}
@@ -259,8 +285,11 @@ const Menu = () => {
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <span
-                className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${dish.Type === "veg" ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
-                  }`}
+                className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${
+                  dish.Type === "veg"
+                    ? "bg-green-500 text-white"
+                    : "bg-yellow-500 text-white"
+                }`}
               >
                 {dish.Type === "veg" ? (
                   <span className="flex items-center gap-1">
@@ -272,7 +301,6 @@ const Menu = () => {
                   </span>
                 )}
               </span>
-
             </div>
             <div className="p-5">
               <h3 className="font-bold text-lg text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
@@ -283,7 +311,9 @@ const Menu = () => {
                 {dish.Description}
               </p>
               <div className="flex justify-between items-center">
-                <span className="text-xl font-bold text-red-600">₹{dish.Price}</span>
+                <span className="text-xl font-bold text-red-600">
+                  ₹{dish.Price}
+                </span>
                 <button
                   onClick={() => handleAddToCart(dish)}
                   className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-semibold py-2 px-4 rounded-lg transition-all flex items-center gap-1"
@@ -322,17 +352,6 @@ const Menu = () => {
           </div>
         </div>
       )} */}
-
-      {/* Add these styles to your CSS file for hiding scrollbars nicely */}
-      <style jsx>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 };

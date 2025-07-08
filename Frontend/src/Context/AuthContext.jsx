@@ -1,120 +1,210 @@
-import { createContext, useContext, useState, useCallback, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import { useToast } from "./ToastContext";
+import appwriteAuth from "../config/appwriteauth";
+import appwriteService from "../config/service";
 
 const AuthContext = createContext();
 
+// Local storage keys for current user only
+const STORAGE_KEYS = {
+  CURRENT_USER: "current_user",
+};
+
+const getFromStorage = (key) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : null;
+  } catch (error) {
+    console.error(`Error getting ${key} from localStorage:`, error);
+    return null;
+  }
+};
+
+const setToStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.error(`Error setting ${key} to localStorage:`, error);
+    return false;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const { showToast } = useToast();
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("current_user") || "null")
-  );
+  const [user, setUser] = useState(() => {
+    return getFromStorage(STORAGE_KEYS.CURRENT_USER);
+  });
+  const [loading, setLoading] = useState(true);
 
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
 
-  const showSingleToast = useCallback((message, type) => {
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = null;
-    }
-
-    pendingToastRef.current = { message, type };
-
-    toastTimeoutRef.current = setTimeout(() => {
-      if (pendingToastRef.current) {
-        showToast(pendingToastRef.current.message, pendingToastRef.current.type);
-        pendingToastRef.current = null;
+  // Check for current user on app load
+  useEffect(() => {
+    const checkCurrentUser = async () => {
+      try {
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
+      } catch (error) {
+        console.error("Error checking current user:", error);
+      } finally {
+        setLoading(false);
       }
-    }, 300);
-  }, [showToast]);
+    };
 
-  // 🔐 Signup via backend
+    checkCurrentUser();
+  }, []);
+
+  const showSingleToast = useCallback(
+    (message, type) => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = null;
+      }
+
+      pendingToastRef.current = { message, type };
+
+      toastTimeoutRef.current = setTimeout(() => {
+        if (pendingToastRef.current) {
+          showToast(
+            pendingToastRef.current.message,
+            pendingToastRef.current.type
+          );
+          pendingToastRef.current = null;
+        }
+      }, 300);
+    },
+    [showToast]
+  );
+
+  // 🔐 Signup with Appwrite
   const signup = async ({
-    name, email, phone, password,
-    houseNo, street, landmark, city, state, pincode
+    name,
+    email,
+    phone,
+    password,
+    houseNo,
+    street,
+    landmark,
+    city,
+    state,
+    pincode,
   }) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Name: name,
-          Email: email,
-          Phone: phone,
-          Password: password,
-          HouseNo: houseNo,
-          Street: street,
-          Landmark: landmark,
-          City: city,
-          State: state,
-          Pincode: pincode
-        }),
+      // Create account in Appwrite (includes auth and user document)
+      const result = await appwriteAuth.createAccount({
+        name,
+        email,
+        phone,
+        password,
+        houseNo,
+        street,
+        landmark,
+        city,
+        state,
+        pincode,
       });
 
-      const data = await res.json();
+      if (result.success) {
+        // Get the current user after signup
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
 
-      if (res.status === 201) {
         showSingleToast("Account created successfully", "success");
-
-        // ✅ Auto-login using same credentials
-        return await login(email, password);
-      } else {
-        showSingleToast(data.error || "Signup failed", "error");
-        return { success: false, message: data.error };
+        return { success: true };
       }
     } catch (err) {
-      showSingleToast("Signup failed", "error");
+      console.error("Signup error:", err);
+      showSingleToast(err.message || "Signup failed", "error");
       return { success: false, message: err.message };
     }
   };
 
-  // 🔐 Login via backend
+  // 🔐 Login with Appwrite
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Email: email, Password: password }),
-      });
+      // Login with Appwrite
+      const result = await appwriteAuth.login({ email, password });
 
-      const data = await res.json();
-      if (res.ok) {
-        const isAdmin = data.user.Email === "admin@smartbite.com"; // 👈 set admin condition
-
-        const fullUser = {
-          ...data.user,
-          token: data.token,
-          isAdmin: data.user.IsAdmin === 1, // normalize here
-        };
-        
-        // check that data.user has `isAdmin` from the backend
-        setUser(fullUser);
-        localStorage.setItem("current_user", JSON.stringify(fullUser));
-        
-        localStorage.setItem("current_user", JSON.stringify(fullUser));
+      if (result.success) {
+        // Get the current user after login
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
 
         showSingleToast("Logged in successfully", "success");
         return { success: true };
-      } else {
-        showSingleToast(data.error || "Login failed", "error");
-        return { success: false, message: data.error };
       }
     } catch (err) {
-      showSingleToast("Login failed", "error");
+      console.error("Login error:", err);
+      showSingleToast(err.message || "Login failed", "error");
       return { success: false, message: err.message };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("current_user");
-    showSingleToast("Logged out successfully", "success");
-    return { success: true };
+  const logout = async () => {
+    try {
+      await appwriteAuth.logout();
+      setUser(null);
+      setToStorage(STORAGE_KEYS.CURRENT_USER, null);
+      showSingleToast("Logged out successfully", "success");
+      return { success: true };
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Even if Appwrite logout fails, clear local state
+      setUser(null);
+      setToStorage(STORAGE_KEYS.CURRENT_USER, null);
+      showSingleToast("Logged out successfully", "success");
+      return { success: true };
+    }
+  };
+
+  // Update user profile
+  const updateProfile = async (updates) => {
+    try {
+      if (!user) {
+        showSingleToast("Please login first", "error");
+        return { success: false, message: "Not authenticated" };
+      }
+
+      const result = await appwriteAuth.updateProfile(user.$id, updates);
+      if (result.success) {
+        const fullUser = { ...user, ...result.user };
+        setUser(fullUser);
+        setToStorage(STORAGE_KEYS.CURRENT_USER, fullUser);
+        showSingleToast("Profile updated successfully", "success");
+        return { success: true };
+      } else {
+        showSingleToast("Failed to update profile", "error");
+        return { success: false, message: "Update failed" };
+      }
+    } catch (err) {
+      console.error("Profile update error:", err);
+      showSingleToast(err.message || "Profile update failed", "error");
+      return { success: false, message: err.message };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, login, signup, logout, updateProfile, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

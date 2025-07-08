@@ -5,7 +5,6 @@ import { useToast } from "../Context/ToastContext";
 import axios from "axios";
 
 const ForgotPassword = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const [email, setEmail] = useState("");
   const [animate, setAnimate] = useState(false);
   const { showToast } = useToast();
@@ -16,20 +15,16 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Show initial loading toast
-    const toastId = showToast("Sending reset mail...", "loading");
-  
-    try {
-      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
-  
-      showToast(res.data.message, "success", toastId); // replace loading toast
-      setEmail("");
-    } catch (err) {
-      showToast(err.response?.data?.error || "Something went wrong", "error", toastId); // replace loading with error
-    }
+
+    // Since we're using local storage, we can't actually reset passwords
+    // This is just a placeholder for future Appwrite integration
+    showToast(
+      "Password reset functionality will be available with Appwrite integration",
+      "info"
+    );
+    setEmail("");
   };
-  
+
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6 md:px-8">
       <motion.div
@@ -39,13 +34,18 @@ const ForgotPassword = () => {
         className="bg-white rounded-2xl shadow-lg p-8"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">Forgot Password</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
+            Forgot Password
+          </h1>
           <p className="text-gray-600">We'll send a reset link to your email</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email Address
             </label>
             <div className="relative">
@@ -75,7 +75,9 @@ const ForgotPassword = () => {
 
         <p className="text-sm text-center mt-6 text-gray-600">
           Remember your password?{" "}
-          <a href="/login" className="text-red-600 hover:underline">Back to Login</a>
+          <a href="/login" className="text-red-600 hover:underline">
+            Back to Login
+          </a>
         </p>
       </motion.div>
     </div>

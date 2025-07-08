@@ -12,14 +12,13 @@ import {
 import { MdOutlineFastfood } from "react-icons/md";
 import { useToast } from "../Context/ToastContext"; // ✅
 
-
 const Cart = () => {
-  const { cart, updateQuantity, removeFromCart, clearCart, loading } = useCart();
+  const { cart, updateQuantity, removeFromCart, clearCart, loading } =
+    useCart();
   const navigate = useNavigate();
   const [animateItems, setAnimateItems] = useState(false);
   const [removingItem, setRemovingItem] = useState(null);
   const { showToast } = useToast(); // ✅
-
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -73,7 +72,6 @@ const Cart = () => {
   //   );
   // }
 
-
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 pb-20">
       <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left mb-2 md:mb-6 text-red-600">
@@ -88,15 +86,17 @@ const Cart = () => {
         <div className="lg:w-2/3 space-y-4">
           {cart.map((item, index) => (
             <div
-              key={`${item.DishID}-${index}`}  // ✅ guaranteed unique
+              key={`${item.DishID}-${index}`} // ✅ guaranteed unique
               className={`bg-white rounded-xl shadow-md overflow-hidden flex flex-col sm:flex-row 
-                ${animateItems
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
+                ${
+                  animateItems
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
                 } 
-                ${removingItem === item.DishID
-                  ? "opacity-0 transform scale-95"
-                  : ""
+                ${
+                  removingItem === item.DishID
+                    ? "opacity-0 transform scale-95"
+                    : ""
                 }
                 transition-all duration-300`}
               style={{ transitionDelay: `${index * 100}ms` }}
@@ -134,7 +134,7 @@ const Cart = () => {
                       type="button"
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                       onClick={() => {
-                        showToast("Updating quantity...", "info");  // 🟡 Toast immediately
+                        showToast("Updating quantity...", "info"); // 🟡 Toast immediately
                         updateQuantity(item.DishID, item.quantity - 1);
                       }}
                       disabled={item.quantity <= 1}
@@ -142,13 +142,15 @@ const Cart = () => {
                     >
                       <FaMinus size={12} />
                     </button>
-                    <span className="px-4 py-1 font-medium">{item.quantity}</span>
+                    <span className="px-4 py-1 font-medium">
+                      {item.quantity}
+                    </span>
 
                     <button
                       type="button"
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                       onClick={() => {
-                        showToast("Updating quantity...", "info");  // 🟡 Toast immediately
+                        showToast("Updating quantity...", "info"); // 🟡 Toast immediately
                         updateQuantity(item.DishID, item.quantity + 1);
                       }}
                       aria-label="Increase quantity"

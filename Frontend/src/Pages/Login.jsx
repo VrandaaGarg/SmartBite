@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaSignInAlt, FaUserPlus } from "react-icons/fa";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaEnvelope,
+  FaLock,
+  FaSignInAlt,
+  FaUserPlus,
+} from "react-icons/fa";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
@@ -29,14 +36,13 @@ const Login = () => {
       const { success, message } = await login(form.email, form.password);
 
       if (success) {
-        const storedUser = JSON.parse(localStorage.getItem("current_user"));
-        if (storedUser?.isAdmin) {
+        // Check user admin status from auth context
+        if (user?.isAdmin) {
           navigate("/admin");
         } else {
           navigate("/");
         }
-      }
-      else {
+      } else {
         setError(message || "Invalid credentials");
       }
     } catch (err) {
@@ -48,10 +54,15 @@ const Login = () => {
 
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6 md:px-8">
-      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}>
+      <div
+        className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${
+          animate ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+        }`}
+      >
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">Welcome Back</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
+            Welcome Back
+          </h1>
           <p className="text-gray-600">Sign in to continue to SmartBite</p>
         </div>
 
@@ -63,7 +74,10 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email Address
             </label>
             <div className="relative">
@@ -84,7 +98,10 @@ const Login = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password
             </label>
             <div className="relative">
@@ -109,26 +126,45 @@ const Login = () => {
               >
                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
-             
             </div>
             <p className="text-sm text-right mt-3">
-                <a href="/forgot-password" className="text-red-600 hover:underline text-right">
-                  Forgot your password?
-                </a>
-              </p>
+              <a
+                href="/forgot-password"
+                className="text-red-600 hover:underline text-right"
+              >
+                Forgot your password?
+              </a>
+            </p>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
-              }`}
+            className={`w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+              isLoading ? "opacity-80 cursor-not-allowed" : ""
+            }`}
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Signing in...
               </>
@@ -139,7 +175,6 @@ const Login = () => {
             )}
           </button>
         </form>
-
 
         {/* Sign up link */}
         <div className="mt-8 text-center text-sm text-gray-600">

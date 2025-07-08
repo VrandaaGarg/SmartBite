@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaPlus, FaList, FaUsers, FaShoppingBag, FaTools } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  FaPlus,
+  FaList,
+  FaUsers,
+  FaShoppingBag,
+  FaTools,
+} from "react-icons/fa";
+import { motion } from "framer-motion";
+import { useAuth } from "../Context/AuthContext";
 
 const AdminDashboard = () => {
-  const user = JSON.parse(localStorage.getItem("current_user"));
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,15 +39,39 @@ const AdminDashboard = () => {
           <FaTools /> Admin Dashboard
         </h1>
         <p className="text-gray-700 text-md md:text-lg max-w-3xl mx-auto leading-relaxed">
-          Welcome back, <span className="font-semibold text-yellow-600">{user?.Name}</span>! Here's a quick overview of what you can do as an administrator. Use the cards below to efficiently manage dishes, view orders, monitor customers, and keep your SmartBite system running smoothly.
+          Welcome back,{" "}
+          <span className="font-semibold text-yellow-600">{user?.Name}</span>!
+          Here's a quick overview of what you can do as an administrator. Use
+          the cards below to efficiently manage dishes, view orders, monitor
+          customers, and keep your SmartBite system running smoothly.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-        <AdminCard to="/admin/add-dish" icon={<FaPlus />} title="Add Dish" desc="Add new dishes with details." />
-        <AdminCard to="/admin/manage-dishes" icon={<FaList />} title="Manage Dishes" desc="Edit or remove dishes." />
-        <AdminCard to="/admin/orders" icon={<FaShoppingBag />} title="Orders" desc="Track and manage orders." />
-        <AdminCard to="/admin/customers" icon={<FaUsers />} title="Customers" desc="View and manage users." />
+        <AdminCard
+          to="/admin/add-dish"
+          icon={<FaPlus />}
+          title="Add Dish"
+          desc="Add new dishes with details."
+        />
+        <AdminCard
+          to="/admin/manage-dishes"
+          icon={<FaList />}
+          title="Manage Dishes"
+          desc="Edit or remove dishes."
+        />
+        <AdminCard
+          to="/admin/orders"
+          icon={<FaShoppingBag />}
+          title="Orders"
+          desc="Track and manage orders."
+        />
+        <AdminCard
+          to="/admin/customers"
+          icon={<FaUsers />}
+          title="Customers"
+          desc="View and manage users."
+        />
       </div>
     </motion.div>
   );
@@ -58,9 +89,7 @@ const AdminCard = ({ to, icon, title, desc }) => (
       <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-600">
         {title}
       </h3>
-      <p className="text-sm text-gray-500 mt-1 px-2 leading-snug">
-        {desc}
-      </p>
+      <p className="text-sm text-gray-500 mt-1 px-2 leading-snug">{desc}</p>
     </Link>
   </motion.div>
 );

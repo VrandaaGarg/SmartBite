@@ -2,8 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  FaEye, FaEyeSlash, FaUser, FaPhone, FaMapMarkerAlt,
-  FaCity, FaMapPin, FaEnvelope, FaLock, FaHome, FaSignInAlt
+  FaEye,
+  FaEyeSlash,
+  FaUser,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaCity,
+  FaMapPin,
+  FaEnvelope,
+  FaLock,
+  FaHome,
+  FaSignInAlt,
 } from "react-icons/fa";
 
 const Signup = () => {
@@ -31,7 +40,7 @@ const Signup = () => {
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     message: "",
-    color: "bg-gray-200"
+    color: "bg-gray-200",
   });
 
   // Animation on component mount
@@ -54,12 +63,17 @@ const Signup = () => {
     if (/[^A-Za-z0-9]/.test(form.password)) score += 1;
 
     const messages = ["Weak", "Fair", "Good", "Strong"];
-    const colors = ["bg-red-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+    const colors = [
+      "bg-red-500",
+      "bg-yellow-500",
+      "bg-blue-500",
+      "bg-green-500",
+    ];
 
     setPasswordStrength({
       score,
       message: messages[score - 1] || "",
-      color: colors[score - 1] || "bg-gray-200"
+      color: colors[score - 1] || "bg-gray-200",
     });
   }, [form.password]);
 
@@ -73,7 +87,7 @@ const Signup = () => {
       return false;
     }
 
-    if (!form.email.includes('@')) {
+    if (!form.email.includes("@")) {
       setError("Please enter a valid email address");
       return false;
     }
@@ -125,11 +139,6 @@ const Signup = () => {
     setIsLoading(true);
     try {
       const {
-        name, email, password, phone,
-        houseNo, street, landmark, city, state, pincode
-      } = form;
-
-      const { success, message } = await signup({
         name,
         email,
         password,
@@ -139,7 +148,20 @@ const Signup = () => {
         landmark,
         city,
         state,
-        pincode
+        pincode,
+      } = form;
+
+      const { success, message } = await signup({
+        name,
+        email,
+        password,
+        phone: parseInt(phone),
+        houseNo,
+        street,
+        landmark,
+        city,
+        state,
+        pincode: parseInt(pincode),
       });
 
       if (success) {
@@ -154,25 +176,45 @@ const Signup = () => {
     }
   };
 
-
   return (
     <div className="max-w-3xl mx-auto py-5 md:py-10 px-4 sm:px-6">
-      <div className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}>
+      <div
+        className={`bg-white rounded-2xl shadow-lg p-8 transition-all duration-700 transform ${
+          animate ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+        }`}
+      >
         <div className="text-center mb-8">
-          <h1 className="text-xl md:text-3xl font-bold text-red-600 mb-2">Create Your Account</h1>
-          <p className="text-gray-600 text-sm md:text-lg">Join the SmartBite family and enjoy delicious food</p>
+          <h1 className="text-xl md:text-3xl font-bold text-red-600 mb-2">
+            Create Your Account
+          </h1>
+          <p className="text-gray-600 text-sm md:text-lg">
+            Join the SmartBite family and enjoy delicious food
+          </p>
 
           {/* Steps Indicator */}
           <div className="mt-8 flex justify-center">
             <div className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-                }`}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  step >= 1
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 1
               </div>
-              <div className={`w-12 h-1 ${step >= 2 ? 'bg-red-600' : 'bg-gray-200'}`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-                }`}>
+              <div
+                className={`w-12 h-1 ${
+                  step >= 2 ? "bg-red-600" : "bg-gray-200"
+                }`}
+              ></div>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  step >= 2
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 2
               </div>
             </div>
@@ -195,7 +237,10 @@ const Signup = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Full Name*
                   </label>
                   <div className="relative">
@@ -216,7 +261,10 @@ const Signup = () => {
 
                 {/* Phone */}
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Phone Number*
                   </label>
                   <div className="relative">
@@ -237,7 +285,10 @@ const Signup = () => {
 
                 {/* Email */}
                 <div className="md:col-span-2">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Email Address*
                   </label>
                   <div className="relative">
@@ -259,7 +310,10 @@ const Signup = () => {
 
                 {/* House No & Street */}
                 <div>
-                  <label htmlFor="houseNo" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="houseNo"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     House/Flat No.*
                   </label>
                   <div className="relative">
@@ -279,7 +333,10 @@ const Signup = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="street"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Street/Area*
                   </label>
                   <div className="relative">
@@ -300,7 +357,10 @@ const Signup = () => {
 
                 {/* Landmark */}
                 <div>
-                  <label htmlFor="landmark" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="landmark"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Landmark (Optional)
                   </label>
                   <input
@@ -315,7 +375,10 @@ const Signup = () => {
 
                 {/* City */}
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     City*
                   </label>
                   <div className="relative">
@@ -336,7 +399,10 @@ const Signup = () => {
 
                 {/* State */}
                 <div>
-                  <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     State*
                   </label>
                   <input
@@ -352,7 +418,10 @@ const Signup = () => {
 
                 {/* Pincode */}
                 <div>
-                  <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="pincode"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Pincode*
                   </label>
                   <div className="relative">
@@ -388,7 +457,10 @@ const Signup = () => {
             <>
               {/* Password with strength meter */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Create Password*
                 </label>
                 <div className="relative">
@@ -409,7 +481,9 @@ const Signup = () => {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -425,13 +499,15 @@ const Signup = () => {
                       ></div>
                     </div>
                     <p className="text-xs mt-1 text-gray-600">
-                      {passwordStrength.message && `Password strength: ${passwordStrength.message}`}
+                      {passwordStrength.message &&
+                        `Password strength: ${passwordStrength.message}`}
                     </p>
                   </div>
                 )}
 
                 <p className="text-xs text-gray-500 mt-2">
-                  Use at least 8 characters with uppercase letters, numbers, and symbols for a strong password.
+                  Use at least 8 characters with uppercase letters, numbers, and
+                  symbols for a strong password.
                 </p>
               </div>
 
@@ -444,8 +520,18 @@ const Signup = () => {
                     required
                     className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                    I agree to the <a href="#" className="text-red-600 hover:underline">Terms of Service</a> and <a href="#" className="text-red-600 hover:underline">Privacy Policy</a>
+                  <label
+                    htmlFor="terms"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    I agree to the{" "}
+                    <a href="#" className="text-red-600 hover:underline">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="text-red-600 hover:underline">
+                      Privacy Policy
+                    </a>
                   </label>
                 </div>
               </div>
@@ -462,21 +548,36 @@ const Signup = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 md:px-6 py-3 rounded-lg transition flex items-center gap-2 ${isLoading ? 'opacity-80 cursor-not-allowed' : ''
-                    }`}
+                  className={`bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 md:px-6 py-3 rounded-lg transition flex items-center gap-2 ${
+                    isLoading ? "opacity-80 cursor-not-allowed" : ""
+                  }`}
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Creating Account...
                     </>
                   ) : (
-                    <>
-                      Sign Up
-                    </>
+                    <>Sign Up</>
                   )}
                 </button>
               </div>
@@ -494,7 +595,6 @@ const Signup = () => {
             Sign in
           </Link>
         </div>
-
       </div>
     </div>
   );

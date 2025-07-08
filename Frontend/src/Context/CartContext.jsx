@@ -8,17 +8,16 @@ import React, {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
+import appwriteService from "../config/service";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const { user } = useAuth();
   const { showToast } = useToast();
 
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cartTrigger, setCartTrigger] = useState(0); // 🔁 new trigger state
   const toastTimeoutRef = useRef(null);
   const pendingToastRef = useRef(null);
 
@@ -28,7 +27,10 @@ export const CartProvider = ({ children }) => {
       pendingToastRef.current = { message, type };
       toastTimeoutRef.current = setTimeout(() => {
         if (pendingToastRef.current) {
-          showToast(pendingToastRef.current.message, pendingToastRef.current.type);
+          showToast(
+            pendingToastRef.current.message,
+            pendingToastRef.current.type
+          );
           pendingToastRef.current = null;
         }
       }, 300);
@@ -36,27 +38,32 @@ export const CartProvider = ({ children }) => {
     [showToast]
   );
 
-  // 🔃 Fetch Cart
+  // 🔃 Fetch Cart from Appwrite
   const fetchCart = useCallback(async () => {
-    if (!user?.CustomerID) return;
+    if (!user?.$id) {
+      setCart([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/cart/${user.CustomerID}`);
-      const data = await res.json();
-      const normalized = data.map(item => ({
-        DishID: item.DishID, // 👈 important for remove/update
-        quantity: item.Quantity,
-        price: item.Price,
-        name: item.Name,
-        image: item.Image,
-        description: item.Description,
+      const cartData = await appwriteService.getCartByUser(user.$id);
+      const normalized = cartData.map((item) => ({
+        cartId: item.$id,
+        DishID: item.dishId,
+        quantity: item.quantity,
+        price: item.price,
+        name: item.name,
+        image: item.imgUrl,
+        description: item.description || "",
       }));
-      
-      
+
       setCart(normalized);
     } catch (err) {
       console.error("Error fetching cart:", err);
       showSingleToast("Failed to load cart", "error");
+      setCart([]); // Set empty cart on error
     } finally {
       setLoading(false);
     }
@@ -64,109 +71,109 @@ export const CartProvider = ({ children }) => {
 
   // 🧠 Watch for login & updates
   useEffect(() => {
-    if (user?.CustomerID) {
+    if (user?.$id) {
       fetchCart();
     } else {
       setCart([]);
     }
-  }, [user, fetchCart, cartTrigger]); // 🔥 include cartTrigger
+  }, [user, fetchCart]);
 
   // ➕ Add to Cart
   const addToCart = async (dish) => {
+    if (!user?.$id) {
+      showSingleToast("Please login to add items to cart", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID: dish.DishID,
-          Quantity: 1,
-          Amount: dish.Price * 1, // ✅ required by backend
-        }),
+      await appwriteService.addToCart({
+        userId: user.$id,
+        dishId: dish.DishID || dish.$id,
+        quantity: 1,
+        name: dish.Name || dish.name,
+        imgUrl: dish.Image || dish.imgUrl,
+        price: dish.Price || dish.price,
       });
-  
-      if (res.ok) {
-        showSingleToast(`${dish.Name} added to cart`, "success");
-        await fetchCart();
-      } else {
-        throw new Error("Failed to add to cart");
-      }
+
+      showSingleToast(`${dish.Name || dish.name} added to cart`, "success");
+      fetchCart();
     } catch (err) {
-      console.error(err);
+      console.error("Error adding to cart:", err);
       showSingleToast("Error adding to cart", "error");
     }
   };
-  
-  
+
   const updateQuantity = async (DishID, newQuantity) => {
     if (newQuantity <= 0) return removeFromCart(DishID);
 
+    if (!user?.$id) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID,
-          Quantity: newQuantity,
-        }),
-      });
-      if (res.ok) {
-        setCartTrigger((prev) => prev + 1);
-      } else {
-        throw new Error("Update failed");
+      // Find the cart item to get its cartId
+      const cartItem = cart.find((item) => item.DishID === DishID);
+      if (!cartItem) {
+        throw new Error("Cart item not found");
       }
+
+      await appwriteService.updateCartQuantity(cartItem.cartId, newQuantity);
+      fetchCart();
     } catch (err) {
-      console.error(err);
+      console.error("Error updating quantity:", err);
       showSingleToast("Error updating quantity", "error");
     }
   };
 
   const removeFromCart = async (DishID) => {
+    if (!user?.$id) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/remove`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID,
-        }),
-      });
-  
-      if (res.ok) {
-        showSingleToast("Item removed from cart", "info");
-        fetchCart(); // ✅ refresh
-      } else {
-        throw new Error("Failed to remove item");
+      // Find the cart item to get its cartId
+      const cartItem = cart.find((item) => item.DishID === DishID);
+      if (!cartItem) {
+        throw new Error("Cart item not found");
       }
+
+      await appwriteService.removeFromCart(cartItem.cartId);
+      showSingleToast("Item removed from cart", "info");
+      fetchCart();
     } catch (err) {
-      console.error(err);
+      console.error("Error removing item:", err);
       showSingleToast("Error removing item", "error");
     }
   };
-  
 
   const clearCart = async () => {
+    if (!user?.$id) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/clear/${user.CustomerID}`, {
-        method: "DELETE",
-      });
-  
-      if (res.ok) {
-        setCart([]); // ⬅️ immediately clear UI
-        showSingleToast("Cart cleared", "info");
-      } else {
-        throw new Error("Failed to clear cart");
-      }
+      await appwriteService.clearCart(user.$id);
+      setCart([]);
+      showSingleToast("Cart cleared", "info");
     } catch (err) {
-      console.error(err);
+      console.error("Error clearing cart:", err);
       showSingleToast("Error clearing cart", "error");
     }
   };
-  
+
   return (
     <CartContext.Provider
-      value={{ cart, loading, addToCart, updateQuantity, removeFromCart, clearCart }}
+      value={{
+        cart,
+        loading,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

@@ -12,27 +12,27 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import { useToast } from "../Context/ToastContext";
-import axios from "axios";
 
 const Profile = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.Name || "",
-    phone: user?.Phone || "",
-    houseNo: user?.HouseNo || "",
-    street: user?.Street || "",
-    landmark: user?.Landmark || "",
-    city: user?.City || "",
-    state: user?.State || "",
-    pincode: user?.Pincode || "",
+    name: user?.name || "",
+    phone: user?.phone || "",
+    houseNo: user?.houseNo || "",
+    street: user?.street || "",
+    landmark: user?.landmark || "",
+    city: user?.city || "",
+    state: user?.state || "",
+    pincode: user?.pincode || "",
   });
 
-  const fullAddress = `${formData.houseNo}, ${formData.street}${formData.landmark ? ", " + formData.landmark : ""}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
+  const fullAddress = `${formData.houseNo}, ${formData.street}${
+    formData.landmark ? ", " + formData.landmark : ""
+  }, ${formData.city}, ${formData.state} - ${formData.pincode}`;
 
   const handleLogout = () => {
     logout();
@@ -48,8 +48,7 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    const updatedUser = {
-      ...user,
+    const updates = {
       Name: formData.name,
       Phone: formData.phone,
       HouseNo: formData.houseNo,
@@ -59,21 +58,12 @@ const Profile = () => {
       State: formData.state,
       Pincode: formData.pincode,
     };
-  
-    // ⏱ Update frontend immediately
-    localStorage.setItem("current_user", JSON.stringify(updatedUser));
-  
-    // 🔁 Async sync to backend
-    try {
-      await axios.put(`${API_URL}/api/auth/update-profile`, updatedUser);
-      showToast("Profile updated successfully", "success");
+
+    const result = await updateProfile(updates);
+    if (result.success) {
       setIsEditing(false);
-    } catch (err) {
-      showToast("Failed to sync with backend", "error");
-      console.error("Backend sync failed:", err);
     }
   };
-  
 
   if (!user) {
     return (
@@ -103,22 +93,28 @@ const Profile = () => {
       {/* Profile Form */}
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
           <input
             name="name"
             value={formData.name}
             disabled={!isEditing}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded-lg border ${isEditing ? "bg-white" : "bg-gray-100 text-gray-500"}`}
+            className={`w-full px-4 py-2 rounded-lg border ${
+              isEditing ? "bg-white" : "bg-gray-100 text-gray-500"
+            }`}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
           <div className="flex items-center gap-2">
             <FaEnvelope className="text-gray-500" />
             <input
-              value={user.Email}
+              value={user.email}
               disabled
               className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-500 border"
             />
@@ -126,7 +122,9 @@ const Profile = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Phone
+          </label>
           <div className="flex items-center gap-2">
             <FaPhone className="text-gray-500" />
             <input
@@ -134,16 +132,27 @@ const Profile = () => {
               value={formData.phone}
               disabled={!isEditing}
               onChange={handleChange}
-              className={`w-full px-4 py-2 rounded-lg border ${isEditing ? "bg-white" : "bg-gray-100 text-gray-500"}`}
+              className={`w-full px-4 py-2 rounded-lg border ${
+                isEditing ? "bg-white" : "bg-gray-100 text-gray-500"
+              }`}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Address
+          </label>
           {isEditing ? (
             <div className="grid grid-cols-2 gap-4">
-              {["houseNo", "street", "landmark", "city", "state", "pincode"].map((field, index) => (
+              {[
+                "houseNo",
+                "street",
+                "landmark",
+                "city",
+                "state",
+                "pincode",
+              ].map((field, index) => (
                 <input
                   key={index}
                   name={field}

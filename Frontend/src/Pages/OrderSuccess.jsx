@@ -29,9 +29,12 @@ const OrderSuccess = () => {
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
         <div className="text-center max-w-md">
           <FaReceipt className="text-5xl text-gray-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-3">No Order Details Found</h2>
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">
+            No Order Details Found
+          </h2>
           <p className="text-gray-500 mb-6">
-            We couldn't find details for your recent order. It may have been processed in another session.
+            We couldn't find details for your recent order. It may have been
+            processed in another session.
           </p>
           <button
             onClick={() => navigate("/orders")}
@@ -81,29 +84,35 @@ const OrderSuccess = () => {
             <div>
               <h2 className="text-lg font-semibold">Order #{order.OrderID}</h2>
               <p className="text-sm text-red-100">
-                {new Date(order.createdAt).toLocaleString()}
+                {new Date(order.OrderDate).toLocaleString()}
               </p>
             </div>
             <div className="text-right">
-              <div className="text-xl font-bold">₹{order.totalAmount}</div>
-              <p className="text-sm text-red-100">{order.items.length} items</p>
+              <div className="text-xl font-bold">₹{order.TotalAmount}</div>
+              <p className="text-sm text-red-100">
+                {order.Items?.length || 0} items
+              </p>
             </div>
           </div>
         </div>
 
         <div className="px-6 py-5 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Order</h3>
-          {order.items.map((item, idx) => (
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Your Order
+          </h3>
+          {order.Items?.map((item, idx) => (
             <div key={idx} className="flex justify-between items-center py-2">
               <div className="flex items-center">
-                <span className="text-red-600 font-medium mr-2">{item.quantity}×</span>
+                <span className="text-red-600 font-medium mr-2">
+                  {item.quantity}×
+                </span>
                 <span className="text-gray-800">{item.name}</span>
               </div>
               <span className="font-medium text-gray-700">
                 ₹{item.price * item.quantity}
               </span>
             </div>
-          ))}
+          )) || <p className="text-gray-500">No items found</p>}
         </div>
 
         <div className="p-6 grid md:grid-cols-2 gap-6">
@@ -111,21 +120,25 @@ const OrderSuccess = () => {
             <div className="flex items-start gap-3">
               <FaMapMarkerAlt className="text-red-600 mt-1" />
               <div>
-                <h4 className="font-semibold text-gray-800">Delivery Address</h4>
-                <p className="text-gray-600">{order.address}</p>
+                <h4 className="font-semibold text-gray-800">
+                  Delivery Address
+                </h4>
+                <p className="text-gray-600">{order.DeliveryAddress}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <FaCreditCard className="text-red-600 mt-1" />
               <div>
                 <h4 className="font-semibold text-gray-800">Payment Method</h4>
-                <p className="text-gray-600 uppercase">{order.paymentMethod}</p>
+                <p className="text-gray-600 uppercase">{order.PaymentMethod}</p>
               </div>
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-800 mb-3">Estimated Delivery</h4>
+            <h4 className="font-semibold text-gray-800 mb-3">
+              Estimated Delivery
+            </h4>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-gray-800">
                 {estimatedDelivery.toLocaleTimeString([], {

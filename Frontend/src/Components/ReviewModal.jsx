@@ -1,33 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { FaStar, FaTimes, FaRegSmile } from "react-icons/fa";
+import { FaStar, FaTimes, FaRegSmile, FaTrash } from "react-icons/fa";
 import { useOrder } from "../Context/OrderContext";
+import { useReview } from "../Context/ReviewContext";
+import { useAuth } from "../Context/AuthContext";
 import { useToast } from "../Context/ToastContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ReviewModal = ({ dishId, onClose, existingReview }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
   const { refreshReviewInOrders } = useOrder();
+  const { saveReview, deleteReview, getExistingReview } = useReview();
   const { showToast } = useToast();
 
   useEffect(() => {
-    if (existingReview) {
-      setRating(existingReview.Rating);
-      setComment(existingReview.Comment);
+    // If existingReview is passed, use it; otherwise get from context
+    const reviewToUse = existingReview || getExistingReview(dishId);
+
+    if (reviewToUse) {
+      setRating(reviewToUse.Rating);
+      setComment(reviewToUse.Comment);
     }
-  }, [existingReview]);
+  }, [existingReview, dishId, getExistingReview]);
 
   const getRatingText = (rating) => {
     switch (rating) {
-      case 1: return "Poor";
-      case 2: return "Fair";
-      case 3: return "Good";
-      case 4: return "Very Good";
-      case 5: return "Excellent";
-      default: return "";
+      case 1:
+        return "Poor";
+      case 2:
+        return "Fair";
+      case 3:
+        return "Good";
+      case 4:
+        return "Very Good";
+      case 5:
+        return "Excellent";
+      default:
+        return "";
     }
   };
 
@@ -36,50 +49,50 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
       showToast("Please add a comment to your review", "warning");
       return;
     }
-    
+
     setIsSubmitting(true);
-    const customerId = JSON.parse(localStorage.getItem("current_user"))?.CustomerID;
-
-    const url = existingReview
-      ? `${API_URL}/api/reviews/update`
-      : `${API_URL}/api/reviews/add`;
-
-    const method = existingReview ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          DishID: dishId,
-          CustomerID: customerId,
-          Rating: rating,
-          Comment: comment,
-        }),
-      });
+      const reviewData = {
+        DishID: dishId,
+        Rating: rating,
+        Comment: comment,
+        ReviewID: existingReview?.ReviewID,
+      };
 
-      if (res.ok) {
-        refreshReviewInOrders(dishId, {
-          Rating: rating,
-          Comment: comment,
-          DishID: dishId,
-          CustomerID: customerId,
-          CreatedAt: new Date().toISOString(),
-        });
+      const savedReview = await saveReview(reviewData);
 
-        showToast(
-          existingReview ? "Review updated successfully!" : "Review submitted successfully!",
-          "success"
-        );
+      if (savedReview) {
+        // Update the order context with the new review
+        refreshReviewInOrders(dishId, savedReview);
         onClose();
-      } else {
-        showToast("Failed to submit review.", "error");
       }
     } catch (err) {
       console.error("Review error:", err);
       showToast("An error occurred while submitting the review.", "error");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!existingReview) return;
+
+    setIsDeleting(true);
+
+    try {
+      const success = await deleteReview(dishId);
+
+      if (success) {
+        // Update the order context to remove the review
+        refreshReviewInOrders(dishId, null);
+        onClose();
+      }
+    } catch (err) {
+      console.error("Delete review error:", err);
+      showToast("An error occurred while deleting the review.", "error");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -106,15 +119,17 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
             {existingReview ? "Edit Your Review" : "Share Your Experience"}
           </h3>
           <p className="text-gray-500 mt-1">
-            {existingReview 
-              ? "Update your feedback to help others" 
+            {existingReview
+              ? "Update your feedback to help others"
               : "Your feedback helps others make better choices"}
           </p>
         </div>
 
         {/* Star Rating */}
         <div className="mb-6">
-          <label className="block mb-3 font-medium text-gray-700 text-center">How would you rate it?</label>
+          <label className="block mb-3 font-medium text-gray-700 text-center">
+            How would you rate it?
+          </label>
           <div className="flex items-center justify-center space-x-3 text-3xl mb-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <motion.button
@@ -137,7 +152,7 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
               </motion.button>
             ))}
           </div>
-          
+
           <AnimatePresence>
             {rating > 0 && (
               <motion.div
@@ -146,13 +161,15 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
                 exit={{ opacity: 0 }}
                 className="text-center"
               >
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  rating >= 4 
-                    ? "bg-green-100 text-green-700" 
-                    : rating === 3 
-                      ? "bg-yellow-100 text-yellow-700" 
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    rating >= 4
+                      ? "bg-green-100 text-green-700"
+                      : rating === 3
+                      ? "bg-yellow-100 text-yellow-700"
                       : "bg-red-100 text-red-700"
-                }`}>
+                  }`}
+                >
                   {getRatingText(rating)}
                 </span>
               </motion.div>
@@ -162,7 +179,9 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
 
         {/* Comment */}
         <div className="mb-6">
-          <label className="block mb-2 font-medium text-gray-700">Your Review</label>
+          <label className="block mb-2 font-medium text-gray-700">
+            Your Review
+          </label>
           <textarea
             rows={4}
             value={comment}
@@ -177,33 +196,95 @@ const ReviewModal = ({ dishId, onClose, existingReview }) => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-          
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
             className={`px-5 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 ${
-              isSubmitting
+              isSubmitting || isDeleting
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md"
             } transition-all`}
           >
             {isSubmitting ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 <span>Processing...</span>
               </>
             ) : (
               <>
                 <FaRegSmile />
-                <span>{existingReview ? "Update Review" : "Submit Review"}</span>
+                <span>
+                  {existingReview ? "Update Review" : "Submit Review"}
+                </span>
               </>
             )}
           </motion.button>
+
+          {existingReview && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDelete}
+              disabled={isSubmitting || isDeleting}
+              className={`px-5 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 ${
+                isDeleting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md"
+              } transition-all`}
+            >
+              {isDeleting ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <FaTrash />
+                  <span>Delete Review</span>
+                </>
+              )}
+            </motion.button>
+          )}
 
           <motion.button
             whileHover={{ scale: 1.02 }}

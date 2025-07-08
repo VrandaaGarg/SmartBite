@@ -8,11 +8,18 @@ import React, {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
+import {
+  getCartForUser,
+  addToCart as addToCartStorage,
+  updateCartQuantity as updateCartQuantityStorage,
+  removeFromCart as removeFromCartStorage,
+  clearCart as clearCartStorage,
+  getDishById,
+} from "../utils/localStorage";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const { user } = useAuth();
   const { showToast } = useToast();
 
@@ -28,7 +35,10 @@ export const CartProvider = ({ children }) => {
       pendingToastRef.current = { message, type };
       toastTimeoutRef.current = setTimeout(() => {
         if (pendingToastRef.current) {
-          showToast(pendingToastRef.current.message, pendingToastRef.current.type);
+          showToast(
+            pendingToastRef.current.message,
+            pendingToastRef.current.type
+          );
           pendingToastRef.current = null;
         }
       }, 300);
@@ -36,23 +46,26 @@ export const CartProvider = ({ children }) => {
     [showToast]
   );
 
-  // 🔃 Fetch Cart
-  const fetchCart = useCallback(async () => {
-    if (!user?.CustomerID) return;
+  // 🔃 Fetch Cart from local storage
+  const fetchCart = useCallback(() => {
+    if (!user?.CustomerID) {
+      setCart([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/cart/${user.CustomerID}`);
-      const data = await res.json();
-      const normalized = data.map(item => ({
-        DishID: item.DishID, // 👈 important for remove/update
+      const cartData = getCartForUser(user.CustomerID);
+      const normalized = cartData.map((item) => ({
+        DishID: item.DishID,
         quantity: item.Quantity,
         price: item.Price,
         name: item.Name,
         image: item.Image,
         description: item.Description,
       }));
-      
-      
+
       setCart(normalized);
     } catch (err) {
       console.error("Error fetching cart:", err);
@@ -73,21 +86,16 @@ export const CartProvider = ({ children }) => {
 
   // ➕ Add to Cart
   const addToCart = async (dish) => {
+    if (!user?.CustomerID) {
+      showSingleToast("Please login to add items to cart", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID: dish.DishID,
-          Quantity: 1,
-          Amount: dish.Price * 1, // ✅ required by backend
-        }),
-      });
-  
-      if (res.ok) {
+      const success = addToCartStorage(user.CustomerID, dish.DishID, 1);
+      if (success) {
         showSingleToast(`${dish.Name} added to cart`, "success");
-        await fetchCart();
+        fetchCart();
       } else {
         throw new Error("Failed to add to cart");
       }
@@ -96,23 +104,23 @@ export const CartProvider = ({ children }) => {
       showSingleToast("Error adding to cart", "error");
     }
   };
-  
-  
+
   const updateQuantity = async (DishID, newQuantity) => {
     if (newQuantity <= 0) return removeFromCart(DishID);
 
+    if (!user?.CustomerID) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID,
-          Quantity: newQuantity,
-        }),
-      });
-      if (res.ok) {
-        setCartTrigger((prev) => prev + 1);
+      const success = updateCartQuantityStorage(
+        user.CustomerID,
+        DishID,
+        newQuantity
+      );
+      if (success) {
+        fetchCart();
       } else {
         throw new Error("Update failed");
       }
@@ -123,19 +131,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (DishID) => {
+    if (!user?.CustomerID) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/remove`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          CustomerID: user.CustomerID,
-          DishID,
-        }),
-      });
-  
-      if (res.ok) {
+      const success = removeFromCartStorage(user.CustomerID, DishID);
+      if (success) {
         showSingleToast("Item removed from cart", "info");
-        fetchCart(); // ✅ refresh
+        fetchCart();
       } else {
         throw new Error("Failed to remove item");
       }
@@ -144,16 +149,17 @@ export const CartProvider = ({ children }) => {
       showSingleToast("Error removing item", "error");
     }
   };
-  
 
   const clearCart = async () => {
+    if (!user?.CustomerID) {
+      showSingleToast("Please login first", "error");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/api/cart/clear/${user.CustomerID}`, {
-        method: "DELETE",
-      });
-  
-      if (res.ok) {
-        setCart([]); // ⬅️ immediately clear UI
+      const success = clearCartStorage(user.CustomerID);
+      if (success) {
+        setCart([]);
         showSingleToast("Cart cleared", "info");
       } else {
         throw new Error("Failed to clear cart");
@@ -163,10 +169,17 @@ export const CartProvider = ({ children }) => {
       showSingleToast("Error clearing cart", "error");
     }
   };
-  
+
   return (
     <CartContext.Provider
-      value={{ cart, loading, addToCart, updateQuantity, removeFromCart, clearCart }}
+      value={{
+        cart,
+        loading,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

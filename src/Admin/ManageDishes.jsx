@@ -110,7 +110,7 @@ const ManageDishes = () => {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
+        <div className="overflow-x-auto hidden md:block shadow-xl rounded-xl border border-gray-200">
           <table className="min-w-full bg-white text-sm">
             <thead className="bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-800">
               <tr>
@@ -245,7 +245,7 @@ const ManageDishes = () => {
         {editingDish && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center px-4 py-8 overflow-y-auto">
             <motion.div
-              className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-xl shadow-2xl border border-red-100 relative"
+              className="bg-white rounded-2xl p-4 md:p-8 w-full max-w-xl shadow-2xl border border-red-100 relative"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -260,14 +260,14 @@ const ManageDishes = () => {
                 ×
               </button>
 
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-lg md:text-2xl font-bold text-gray-800 mb-2">
                 Edit Dish Details
               </h2>
-              <p className="text-gray-600 text-sm mb-6">
+              <p className="text-gray-600 hidden md:block text-sm mb-6">
                 Update your menu with accurate and up-to-date information
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-6">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -364,7 +364,7 @@ const ManageDishes = () => {
                     <img
                       src={editingDish.Image}
                       alt={editingDish.Name}
-                      className="w-full h-40 object-cover rounded-lg border shadow-sm"
+                      className="w-full h-24 md:h-40 object-cover rounded-lg border shadow-sm"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src =

@@ -170,15 +170,15 @@ const AddDish = () => {
               >
                 <option value="">Select a category</option>
                 {menuCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {`${cat.icon} ${cat.name}`}
+                  <option key={cat.MenuID} value={cat.MenuID}>
+                    {`${cat.Icon} ${cat.Name}`}
                   </option>
                 ))}
               </select>
               <p className="mt-1 text-xs text-gray-500 italic">
                 {dish.MenuID &&
-                  menuCategories.find((cat) => cat.id === parseInt(dish.MenuID))
-                    ?.description}
+                  menuCategories.find((cat) => cat.MenuID === dish.MenuID)
+                    ?.Description}
               </p>
             </div>
 

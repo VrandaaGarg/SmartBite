@@ -149,7 +149,7 @@ const AddDish = () => {
                   className="w-full border px-4 py-3 rounded-lg shadow-sm focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none transition-all"
                 >
                   <option value="veg">🌱 Vegetarian</option>
-                  <option value="non-veg">🍗 Non-Vegetarian</option>
+                  <option value="nonVeg">🍗 Non-Vegetarian</option>
                 </select>
               </div>
             </div>

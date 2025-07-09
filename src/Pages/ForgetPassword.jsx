@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaPaperPlane } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
-import axios from "axios";
+import appwriteAuth from "../config/appwriteauth";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [animate, setAnimate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -15,14 +17,30 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Since we're using local storage, we can't actually reset passwords
-    // This is just a placeholder for future Appwrite integration
-    showToast(
-      "Password reset functionality will be available with Appwrite integration",
-      "info"
-    );
-    setEmail("");
+    try {
+      // Create the reset URL - this should point to your reset password page
+      const resetUrl = `${window.location.origin}/reset-password`;
+
+      // Send password recovery email using Appwrite
+      await appwriteAuth.createPasswordRecovery(email, resetUrl);
+
+      showToast(
+        "Password reset link has been sent to your email address. Please check your inbox.",
+        "success"
+      );
+      setEmail("");
+    } catch (error) {
+      console.error("Password recovery error:", error);
+      showToast(
+        error.message ||
+          "Failed to send password reset email. Please try again.",
+        "error"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,17 +85,18 @@ const ForgotPassword = () => {
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            disabled={isLoading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r bg-red-500 hover:bg-red-600 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           >
-            <FaPaperPlane /> Send Reset Link
+            <FaPaperPlane /> {isLoading ? "Sending..." : "Send Reset Link"}
           </button>
         </form>
 
         <p className="text-sm text-center mt-6 text-gray-600">
           Remember your password?{" "}
-          <a href="/login" className="text-red-600 hover:underline">
+          <Link to="/login" className="text-red-600 hover:underline">
             Back to Login
-          </a>
+          </Link>
         </p>
       </motion.div>
     </div>

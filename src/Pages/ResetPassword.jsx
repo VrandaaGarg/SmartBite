@@ -1,14 +1,15 @@
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useToast } from "../Context/ToastContext";
-import axios from "axios";
+import appwriteAuth from "../config/appwriteauth";
+import { p } from "framer-motion/client";
 
 const ResetPassword = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
   const [params] = useSearchParams();
-  const token = params.get("token");
+  const userId = params.get("userId");
+  const secret = params.get("secret");
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
@@ -16,11 +17,21 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [animate, setAnimate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
     setAnimate(true);
-  }, []);
+
+    // Check if required parameters are present
+    if (!userId || !secret) {
+      showToast(
+        "Invalid reset link. Please request a new password reset.",
+        "error"
+      );
+      navigate("/forgot-password");
+    }
+  }, [userId, secret, navigate, showToast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,17 +41,33 @@ const ResetPassword = () => {
       return;
     }
 
+    if (password.length < 8) {
+      showToast("Password must be at least 8 characters long", "error");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const res = await axios.post(`${API_URL}/api/auth/reset-password`, {
-        token,
-        password,
-      });
-      showToast(res.data.message, "success");
+      // Use Appwrite to update password recovery
+      await appwriteAuth.updatePasswordRecovery(userId, secret, password);
+
+      showToast(
+        "Password has been reset successfully! You can now login with your new password.",
+        "success"
+      );
       setPassword("");
       setConfirmPassword("");
       navigate("/login");
-    } catch (err) {
-      showToast(err.response?.data?.error || "Reset failed", "error");
+    } catch (error) {
+      console.error("Password reset error:", error);
+      showToast(
+        error.message ||
+          "Failed to reset password. Please try again or request a new reset link.",
+        "error"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,14 +80,19 @@ const ResetPassword = () => {
         className="bg-white rounded-2xl shadow-lg p-8"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">Reset Password</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
+            Reset Password
+          </h1>
           <p className="text-gray-600">Set a new password to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* New Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               New Password
             </label>
             <div className="relative">
@@ -90,7 +122,10 @@ const ResetPassword = () => {
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Confirm Password
             </label>
             <div className="relative">
@@ -117,19 +152,35 @@ const ResetPassword = () => {
               </button>
             </div>
           </div>
+          {password.length == 0 ? (
+            <p className="text-sm text-red-600">Password is required</p>
+          ) : password.length < 8 ? (
+            <p className="text-sm text-red-600">
+              Password must be at least 8 characters long
+            </p>
+          ) : password.length > 8 && confirmPassword.length === 0 ? (
+            <p className="text-sm text-red-600">Confirm your password</p>
+          ) : password !== confirmPassword ? (
+            <p className="text-sm text-red-600">Passwords do not match</p>
+          ) : (
+            <p className="text-sm text-green-600">Password match succesfully</p>
+          )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            disabled={isLoading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r bg-red-500 hover:bg-red-600 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           >
-            Reset Password
+            {isLoading ? "Resetting..." : "Reset Password"}
           </button>
         </form>
 
         <p className="text-sm text-center mt-6 text-gray-600">
           Remember your password?{" "}
-          <a href="/login" className="text-red-600 hover:underline">Go back to Login</a>
+          <Link to="/login" className="text-red-600 hover:underline">
+            Go back to Login
+          </Link>
         </p>
       </motion.div>
     </div>

@@ -23,9 +23,7 @@ const ViewCustomers = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user } = useAuth();
-  const isSuperAdmin =
-    user?.email === "vrandacodz@gmail.com" ||
-    user?.Email === "vrandacodz@gmail.com";
+  const isSuperAdmin = user?.isAdmin === true;
 
   const handleAdminChange = async (email, makeAdmin = true) => {
     try {
@@ -66,16 +64,34 @@ const ViewCustomers = () => {
     const fetchCustomers = async () => {
       try {
         const userData = await appwriteService.getAllUsers();
+
         // Transform data to match expected format
-        const transformedUsers = userData.map((user) => ({
-          ...user,
-          CustomerID: user.$id,
-          Name: user.name || user.Name,
-          Email: user.email || user.Email,
-          Phone: user.phone || user.Phone,
-          IsAdmin: user.isAdmin ? 1 : 0,
-          CreatedAt: user.createdAt || user.$createdAt,
-        }));
+        const transformedUsers = userData.map((user) => {
+          const addressParts = [
+            user.houseNo || "",
+            user.street ? ", " + user.street : "",
+            user.landmark ? ", " + user.landmark : "",
+            user.city ? ", " + user.city : "",
+            user.state ? ", " + user.state : "",
+          ];
+
+          const address =
+            addressParts.join("").trim() +
+            (user.pincode ? ` (${user.pincode})` : "");
+
+          return {
+            ...user,
+            CustomerID: user.$id,
+            Name: user.name || user.Name,
+            Email: user.email || user.Email,
+            Phone: user.phone || user.Phone,
+            Address: address,
+            IsAdmin: user.isAdmin ? 1 : 0,
+            CreatedAt: user.createdAt || user.$createdAt,
+          };
+        });
+
+        console.log(transformedUsers);
         setCustomers(transformedUsers);
       } catch (err) {
         console.error("Failed to fetch customers:", err);
@@ -124,13 +140,12 @@ const ViewCustomers = () => {
         </p>
         <p className="flex items-start gap-2">
           <FaMapMarkerAlt className="text-gray-500 min-w-[16px] mt-1" />
-          <span className="text-gray-600">
-            {cust.HouseNo}, {cust.Street}, {cust.Landmark},<br />
-            {cust.City}, {cust.State} - {cust.Pincode}
-          </span>
+          <span className="text-gray-600">{cust.Address}</span>
         </p>
       </div>
-      {isSuperAdmin && cust.Email !== "vrandacodz@gmail.com" && (
+
+      {/* Promote and demote button */}
+      {isSuperAdmin && cust.email !== "hi@vrandagarg.in" && (
         <div className="mt-4 pt-3 border-t border-gray-100">
           <button
             onClick={() =>

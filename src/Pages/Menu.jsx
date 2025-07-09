@@ -59,7 +59,14 @@ const Menu = () => {
 
   const filteredDishes = dishes.filter((dish) => {
     const matchMenu = selectedMenuId ? dish.MenuID === selectedMenuId : true;
-    const matchType = filter.type === "all" || dish.Type === filter.type;
+
+    // Handle both "non-veg" and "nonVeg" for backward compatibility
+    let matchType = filter.type === "all";
+    if (filter.type === "veg") {
+      matchType = dish.Type === "veg";
+    } else if (filter.type === "non-veg") {
+      matchType = dish.Type === "non-veg" || dish.Type === "nonVeg";
+    }
 
     const matchPrice = dish.Price <= filter.maxPrice;
     const matchSearch =

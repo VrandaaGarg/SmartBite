@@ -56,12 +56,25 @@ const AvatarDropdown = ({ user, logout, isMobile = false }) => {
       >
         {user.name?.charAt(0).toUpperCase()}
       </MenuButton>
-      <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-xl ring-1 ring-black/10 focus:outline-none text-black z-50 py-1">
+      <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl bg-white shadow-xl ring-1 ring-black/10 focus:outline-none text-black z-50 pb-1">
+        <MenuItem>
+          <div className="flex items-center gap-2 px-5 py-3 bg-red-500/10 rounded-t-md">
+            <div className="w-10 h-10 bg-red-500/50 border border-red-500 rounded-full text-white text-2xl flex items-center justify-center">
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-md font-semibold">{user.name}</span>
+              <span className="text-md text-gray-500 truncate w-40">
+                {user.email}
+              </span>
+            </div>
+          </div>
+        </MenuItem>
         {user?.isAdmin && (
           <MenuItem>
             <Link
               to="/admin"
-              className="flex px-4 py-2 text-sm hover:bg-red-50 transition items-center gap-2"
+              className="flex px-5 py-3 text-md md:text-lg hover:bg-red-50 transition items-center gap-2"
             >
               <FaUserCircle className="text-red-600" /> Admin Dashboard
             </Link>
@@ -70,7 +83,7 @@ const AvatarDropdown = ({ user, logout, isMobile = false }) => {
         <MenuItem>
           <Link
             to="/profile"
-            className="flex px-4 py-2 text-sm hover:bg-red-50 transition items-center gap-2"
+            className="flex px-5 py-3 text-md md:text-lg hover:bg-red-50 transition items-center gap-2"
           >
             <FaUserCircle className="text-red-600" /> My Profile
           </Link>
@@ -78,15 +91,15 @@ const AvatarDropdown = ({ user, logout, isMobile = false }) => {
         <MenuItem>
           <Link
             to="/orders"
-            className="flex px-4 py-2 text-sm hover:bg-red-50 transition items-center gap-2"
+            className="flex px-5 py-3 text-md md:text-lg hover:bg-red-50 transition items-center gap-2"
           >
             <FaHistory className="text-red-600" /> My Orders
           </Link>
         </MenuItem>
-        <MenuItem>
+        <MenuItem className="rounded-b-md border-t border-gray-500/50">
           <button
             onClick={logout}
-            className="flex w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition items-center gap-2"
+            className="flex w-full text-left px-5 py-3 text-md md:text-lg text-red-600 hover:bg-red-50 transition items-center gap-2"
           >
             <FaSignOutAlt /> Logout
           </button>

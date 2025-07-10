@@ -6,12 +6,14 @@ import {
   FaLeaf,
   FaDrumstickBite,
   FaUtensils,
+  FaStar,
 } from "react-icons/fa";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../Context/ToastContext";
 import MenuModal from "../Components/MenuModal";
 import { useData } from "../Context/DataContext";
+import { useReview } from "../Context/ReviewContext";
 
 const Menu = () => {
   const [selectedMenuId, setSelectedMenuId] = useState(null);
@@ -24,6 +26,7 @@ const Menu = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDish, setSelectedDish] = useState(null);
+  const { getAverageRating, getReviewsForDishId } = useReview();
 
   // Use DataContext for menus and dishes
   const { menus, dishes, loading: dataLoading } = useData();
@@ -107,7 +110,7 @@ const Menu = () => {
               placeholder="Search dishes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-full focus:outline-none  focus:border-red-500 transition-all duration-300"
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
@@ -121,11 +124,11 @@ const Menu = () => {
       </div>
 
       {/* Category Scrollable Filters */}
-      <div className="mb-6 text-sm md:text-lg overflow-x-auto pb-2 hide-scrollbar">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-6 text-xs md:text-sm overflow-x-auto pb-2 hide-scrollbar">
+        <div className="flex gap-2 min-w-max justify-center">
           <button
             onClick={() => setSelectedMenuId(null)}
-            className={`rounded-full px-3 md:px-6 py-2 md:py-3 font-semibold border-2 flex items-center gap-2 ${
+            className={`rounded-full px-3 text-xs md:text-sm md:px-6 py-2 md:py-3 font-semibold border-2 flex items-center gap-2 ${
               selectedMenuId === null
                 ? "bg-red-600 text-white border-red-600 shadow-md"
                 : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -143,7 +146,7 @@ const Menu = () => {
                   menu.MenuID === selectedMenuId ? null : menu.MenuID
                 )
               }
-              className={`rounded-full px-3 md:px-6 py-2 md:py-3  font-semibold border-2 flex items-center gap-2 ${
+              className={`rounded-full text-xs md:text-sm px-3 md:px-6 py-2 md:py-3  font-semibold border-2 flex items-center gap-2 ${
                 selectedMenuId === menu.MenuID
                   ? "bg-red-600 text-white border-red-600 shadow-md"
                   : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -161,14 +164,14 @@ const Menu = () => {
         <div className="bg-white p-4 rounded-lg shadow-md mb-6 transition-all duration-300">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Diet Type Filter */}
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold mb-2 text-gray-700">
+            <div className="flex-1 flex flex-col gap-2 justify-center items-center">
+              <h3 className="text-xs md:text-sm font-semibold mb-2 text-gray-700">
                 Diet Type
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 justify-center items-center">
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "all" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                  className={`flex items-center text-xs md:text-sm gap-2 px-2 md:px-4 py-1 md:py-2 rounded-full transition-all ${
                     filter.type === "all"
                       ? "bg-red-100 text-red-800 font-medium"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -183,7 +186,7 @@ const Menu = () => {
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                  className={`flex items-center text-xs md:text-sm gap-2 px-2 md:px-4 py-1 md:py-2 rounded-full transition-all ${
                     filter.type === "veg"
                       ? "bg-green-100 text-green-800 font-medium"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -198,7 +201,7 @@ const Menu = () => {
                 </button>
                 <button
                   onClick={() => setFilter((f) => ({ ...f, type: "non-veg" }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                  className={`flex items-center text-xs md:text-sm gap-2 px-2 md:px-4 py-1 md:py-2 rounded-full transition-all ${
                     filter.type === "non-veg"
                       ? "bg-yellow-100 text-yellow-800 font-medium"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -217,18 +220,18 @@ const Menu = () => {
             </div>
 
             {/* Price Filter */}
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold mb-2 text-gray-700">
+            <div className="flex-1 flex flex-col gap-2 justify-center items-center">
+              <h3 className="text-xs md:text-sm font-semibold mb-2 text-gray-700">
                 Price Range
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 justify-center items-center">
                 {priceRanges.map((range) => (
                   <button
                     key={range.label}
                     onClick={() =>
                       setFilter((f) => ({ ...f, maxPrice: range.max }))
                     }
-                    className={`px-4 py-2 rounded-full transition-all ${
+                    className={`px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm rounded-full transition-all ${
                       filter.maxPrice === range.max
                         ? "bg-red-100 text-red-800 font-medium"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -291,6 +294,17 @@ const Menu = () => {
                 onClick={() => setSelectedDish(dish)} // 🟢 opens modal on click
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
               />
+              {getAverageRating(dish.DishID) && (
+                <div className="absolute top-2 left-2  bg-white/90 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg flex items-center gap-1 text-sm sm:text-base">
+                  <FaStar className="text-yellow-500" />
+                  <span className="font-medium">
+                    {getAverageRating(dish.DishID)}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    ({getReviewsForDishId(dish.DishID).length})
+                  </span>
+                </div>
+              )}
               <span
                 className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-full font-semibold shadow ${
                   dish.Type === "veg"

@@ -201,9 +201,118 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Password reset functionality
+  const resetPassword = async (email) => {
+    try {
+      const resetUrl = `${window.location.origin}/reset-password`;
+      const result = await appwriteAuth.createPasswordRecovery(email, resetUrl);
+      if (result.success) {
+        showSingleToast("Password reset email sent successfully", "success");
+        return { success: true };
+      }
+    } catch (err) {
+      console.error("Password reset error:", err);
+      showSingleToast(err.message || "Failed to send reset email", "error");
+      return { success: false, message: err.message };
+    }
+  };
+
+  const confirmPasswordReset = async (userId, secret, newPassword) => {
+    try {
+      const result = await appwriteAuth.updatePasswordRecovery(
+        userId,
+        secret,
+        newPassword
+      );
+      if (result.success) {
+        showSingleToast("Password updated successfully", "success");
+        return { success: true };
+      }
+    } catch (err) {
+      console.error("Password confirmation error:", err);
+      showSingleToast(err.message || "Failed to update password", "error");
+      return { success: false, message: err.message };
+    }
+  };
+
+  // Email verification functionality
+  const sendEmailVerification = async () => {
+    try {
+      if (!user) {
+        showSingleToast("Please login first", "error");
+        return { success: false, message: "Not authenticated" };
+      }
+
+      const verificationUrl = `${window.location.origin}/verify-email`;
+      const result = await appwriteService.verifyEmail(verificationUrl);
+
+      if (result.success) {
+        showSingleToast(
+          "Verification email sent! Check your inbox.",
+          "success"
+        );
+        return { success: true };
+      }
+    } catch (err) {
+      console.error("Email verification error:", err);
+      showSingleToast(
+        err.message || "Failed to send verification email",
+        "error"
+      );
+      return { success: false, message: err.message };
+    }
+  };
+
+  const confirmEmailVerification = async (userId, secret) => {
+    try {
+      const result = await appwriteService.confirmEmailVerification(
+        userId,
+        secret
+      );
+
+      if (result.success) {
+        // Refresh user data to get updated verification status
+        const currentUser = await appwriteAuth.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+        }
+
+        showSingleToast("Email verified successfully!", "success");
+        return { success: true };
+      }
+    } catch (err) {
+      console.error("Email verification confirmation error:", err);
+
+      // Better error handling for common scenarios
+      let errorMessage = err.message || "Failed to verify email";
+
+      if (err.message && err.message.includes("Invalid token")) {
+        errorMessage =
+          "This verification link has expired or has already been used.";
+        // Don't show toast for invalid token as it's handled in the UI
+        return { success: false, message: errorMessage };
+      }
+
+      showSingleToast(errorMessage, "error");
+      return { success: false, message: errorMessage };
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, login, signup, logout, updateProfile, loading }}
+      value={{
+        user,
+        login,
+        signup,
+        logout,
+        updateProfile,
+        resetPassword,
+        confirmPasswordReset,
+        sendEmailVerification,
+        confirmEmailVerification,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

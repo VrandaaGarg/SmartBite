@@ -29,6 +29,7 @@ import ViewOrders from "./Admin/ViewOrders";
 import ProtectedAdminRoute from "./Context/ProtectedAdminRoute";
 import ForgotPassword from "./Pages/ForgetPassword";
 import ResetPassword from "./Pages/ResetPassword";
+import VerifyEmail from "./Pages/VerifyEmail";
 import { ReviewProvider } from "./Context/ReviewContext";
 import { DataProvider } from "./Context/DataContext";
 
@@ -78,6 +79,7 @@ root.render(
                         path="/reset-password"
                         element={<ResetPassword />}
                       />
+                      <Route path="/verify-email" element={<VerifyEmail />} />
                     </Route>
 
                     {/* ✅ Admin Routes (Separate from "/" layout) */}

@@ -1,4 +1,4 @@
-import { databases, DATABASE_ID, COLLECTION_IDS } from "./appwrite";
+import { databases, DATABASE_ID, COLLECTION_IDS, account } from "./appwrite";
 import { ID, Query } from "appwrite";
 
 class AppwriteService {
@@ -36,7 +36,8 @@ class AppwriteService {
     try {
       const response = await databases.listDocuments(
         DATABASE_ID,
-        COLLECTION_IDS.DISHES
+        COLLECTION_IDS.DISHES,
+        [Query.limit(100)]
       );
       return response.documents;
     } catch (error) {
@@ -260,7 +261,7 @@ class AppwriteService {
       const response = await databases.listDocuments(
         DATABASE_ID,
         COLLECTION_IDS.ORDERS,
-        [Query.orderDesc("orderedOn")]
+        [Query.orderDesc("orderedOn"), Query.limit(500)]
       );
       return response.documents;
     } catch (error) {
@@ -366,7 +367,8 @@ class AppwriteService {
     try {
       const response = await databases.listDocuments(
         DATABASE_ID,
-        COLLECTION_IDS.USERS
+        COLLECTION_IDS.USERS,
+        [Query.limit(100)]
       );
       return response.documents;
     } catch (error) {
@@ -386,6 +388,27 @@ class AppwriteService {
       return response;
     } catch (error) {
       console.error("Error updating user:", error);
+      throw error;
+    }
+  }
+
+  // ===== EMAIL VERIFICATION OPERATIONS =====
+  async verifyEmail(url) {
+    try {
+      const response = await account.createVerification(url);
+      return { success: true, verification: response };
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      throw error;
+    }
+  }
+
+  async confirmEmailVerification(userId, secret) {
+    try {
+      const response = await account.updateVerification(userId, secret);
+      return { success: true, verification: response };
+    } catch (error) {
+      console.error("Error confirming email verification:", error);
       throw error;
     }
   }

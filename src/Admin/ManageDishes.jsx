@@ -19,14 +19,18 @@ const ManageDishes = () => {
   const { dishes, refreshData } = useData();
 
   useEffect(() => {
+    let filtered;
     if (searchTerm) {
-      const filtered = dishes.filter((dish) =>
+      filtered = dishes.filter((dish) =>
         dish.Name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredDishes(filtered);
     } else {
-      setFilteredDishes(dishes);
+      filtered = [...dishes];
     }
+
+    // Sort dishes alphabetically by name (A-Z)
+    filtered.sort((a, b) => a.Name.localeCompare(b.Name));
+    setFilteredDishes(filtered);
   }, [searchTerm, dishes]);
 
   const handleDelete = async (id) => {

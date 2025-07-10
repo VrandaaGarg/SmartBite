@@ -89,7 +89,7 @@ export const CartProvider = ({ children }) => {
       await appwriteService.addToCart({
         userId: user.$id,
         dishId: dish.DishID || dish.$id,
-        quantity: 1,
+        quantity: dish.quantity || 1,
         name: dish.Name || dish.name,
         imgUrl: dish.Image || dish.imgUrl,
         price: dish.Price || dish.price,

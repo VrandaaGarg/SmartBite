@@ -17,6 +17,17 @@ const VerifyEmail = () => {
   const [status, setStatus] = useState("verifying"); // verifying, success, error, already_verified
   const [message, setMessage] = useState("");
 
+  // Separate effect to watch for user verification status changes
+  useEffect(() => {
+    if (user && user.emailVerification && status === "verifying") {
+      setStatus("success");
+      setMessage("Your email has been verified successfully!");
+      setTimeout(() => {
+        navigate("/profile");
+      }, 3000);
+    }
+  }, [user, status, navigate]);
+
   useEffect(() => {
     const userId = searchParams.get("userId");
     const secret = searchParams.get("secret");
@@ -41,12 +52,8 @@ const VerifyEmail = () => {
       try {
         const result = await confirmEmailVerification(userId, secret);
         if (result.success) {
-          setStatus("success");
-          setMessage("Your email has been verified successfully!");
-          // Redirect to profile page after 3 seconds
-          setTimeout(() => {
-            navigate("/profile");
-          }, 3000);
+          // Don't set status here - let the user effect handle it
+          // The user state will be updated by the AuthContext
         } else {
           setStatus("error");
           // Better error handling for common scenarios

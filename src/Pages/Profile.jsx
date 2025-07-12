@@ -193,7 +193,7 @@ const Profile = () => {
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-2 flex flex-wrap justify-center gap-2">
+          <div className="bg-white rounded-xl shadow-lg p-2 flex flex-wrap justify-center gap-2 md:gap-4">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -658,14 +658,7 @@ const Profile = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-white rounded-md md:rounded-lg">
-                      <span className="text-gray-700 font-medium">
-                        Two-Factor Authentication:
-                      </span>
-                      <span className="px-3 py-1 md:px-4 md:py-2 rounded-md md:rounded-full text-sm md:text-base font-medium bg-gray-100 text-gray-600">
-                        Not Enabled
-                      </span>
-                    </div>
+
                     <div className="flex items-center justify-between p-4 bg-white rounded-md md:rounded-lg">
                       <span className="text-gray-700 font-medium">
                         Login Sessions:

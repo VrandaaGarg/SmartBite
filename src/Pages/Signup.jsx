@@ -15,6 +15,9 @@ import {
   FaSignInAlt,
 } from "react-icons/fa";
 
+//url for fetching block,State,Pincode
+//https://api.postalpincode.in/pincode/${pincode}
+
 const Signup = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +45,8 @@ const Signup = () => {
     message: "",
     color: "bg-gray-200",
   });
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
 
   // Animation on component mount
   useEffect(() => {
@@ -77,8 +82,52 @@ const Signup = () => {
     });
   }, [form.password]);
 
+  // Function to fetch pincode data
+  const fetchPincodeData = async (pincode) => {
+    if (pincode.length !== 6) return;
+
+    setPincodeLoading(true);
+    setPincodeError("");
+
+    try {
+      const response = await fetch(
+        `https://api.postalpincode.in/pincode/${pincode}`
+      );
+      const data = await response.json();
+
+      if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
+        const postOffice = data[0].PostOffice[0];
+        setForm((prev) => ({
+          ...prev,
+          city: postOffice.Block || postOffice.District || "",
+          state: postOffice.State || "",
+          pincode: postOffice.Pincode || pincode,
+        }));
+        setPincodeError("");
+      } else {
+        setPincodeError("Invalid pincode or no data found");
+      }
+    } catch (error) {
+      setPincodeError("Failed to fetch pincode data");
+      console.error("Pincode API error:", error);
+    } finally {
+      setPincodeLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    // Auto-fill city and state when pincode is entered
+    if (name === "pincode" && value.length === 6 && /^\d{6}$/.test(value)) {
+      fetchPincodeData(value);
+    }
+
+    // Clear pincode error when user starts typing again
+    if (name === "pincode" && pincodeError) {
+      setPincodeError("");
+    }
   };
 
   const validateStep1 = () => {
@@ -373,6 +422,61 @@ const Signup = () => {
                   />
                 </div>
 
+                {/* Pincode */}
+                <div>
+                  <label
+                    htmlFor="pincode"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Pincode*
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaMapPin className="text-gray-400" />
+                    </div>
+                    <input
+                      id="pincode"
+                      name="pincode"
+                      placeholder="400001"
+                      value={form.pincode}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      required
+                      maxLength="6"
+                    />
+                    {pincodeLoading && (
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <svg
+                          className="animate-spin h-4 w-4 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  {pincodeError && (
+                    <p className="text-xs text-red-500 mt-1">{pincodeError}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter 6-digit pincode to auto-fill city and state
+                  </p>
+                </div>
+
                 {/* City */}
                 <div>
                   <label
@@ -414,30 +518,6 @@ const Signup = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
-                </div>
-
-                {/* Pincode */}
-                <div>
-                  <label
-                    htmlFor="pincode"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Pincode*
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaMapPin className="text-gray-400" />
-                    </div>
-                    <input
-                      id="pincode"
-                      name="pincode"
-                      placeholder="400001"
-                      value={form.pincode}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
                 </div>
               </div>
 

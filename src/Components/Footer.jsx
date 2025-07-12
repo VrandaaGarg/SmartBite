@@ -121,7 +121,7 @@ function Footer() {
             </div>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">
               Quick Links
             </h4>
@@ -169,7 +169,7 @@ function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">
               Help & Support
             </h4>
@@ -209,7 +209,7 @@ function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h4 className="font-bold text-lg mb-4 pb-2 border-b border-red-500/30">
               Contact
             </h4>

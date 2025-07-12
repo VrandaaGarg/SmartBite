@@ -8,7 +8,7 @@ Built using **ReactJS**, **Tailwind CSS**, **Framer Motion** and **Appwrite**, t
 
 ## 📸 Project Preview
 
-![Home](./src/assets/home.png)
+![Home](./public/banner.png)
 
 ---
 

@@ -13,24 +13,55 @@ import {
 import { FaCheckCircle } from "react-icons/fa";
 import { CiMail } from "react-icons/ci";
 import { useEffect } from "react";
+import emailjs from "@emailjs/browser";
 
 function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
 
-    if (email) {
-      setSubscribed(true);
-      setEmail("");
+    if (email && !isLoading) {
+      setIsLoading(true);
 
-      // In a real application, you'd send the email to your backend here
+      try {
+        // Send welcome email using EmailJS
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_WELCOME_TEMPLATE_ID,
+          {
+            email: email,
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        );
 
-      // Auto-hide the popup after 5.5 seconds
-      setTimeout(() => {
-        setSubscribed(false);
-      }, 2000);
+        console.log("✅ Welcome email sent successfully!");
+        setSubscribed(true);
+        setEmail("");
+
+        // Auto-hide the popup after 2 seconds
+        setTimeout(() => {
+          setSubscribed(false);
+        }, 2000);
+      } catch (error) {
+        console.error("❌ Failed to send welcome email:", error);
+        console.error("Error details:", {
+          message: error.message,
+          status: error.status,
+          text: error.text,
+        });
+        // Still show success to user even if email fails
+        setSubscribed(true);
+        setEmail("");
+
+        setTimeout(() => {
+          setSubscribed(false);
+        }, 2000);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -63,9 +94,23 @@ function Footer() {
             />
             <button
               type="submit"
-              className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-6 py-3 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all hover:shadow-lg"
+              disabled={isLoading}
+              className={`bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-6 py-3 rounded-full font-semibold transition-all hover:shadow-lg ${
+                isLoading
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:from-yellow-500 hover:to-yellow-600"
+              }`}
             >
-              Subscribe <FaArrowRight className="inline ml-1" />
+              {isLoading ? (
+                <>
+                  Sending...{" "}
+                  <div className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin ml-1"></div>
+                </>
+              ) : (
+                <>
+                  Subscribe <FaArrowRight className="inline ml-1" />
+                </>
+              )}
             </button>
           </form>
 

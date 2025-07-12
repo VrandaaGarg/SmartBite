@@ -146,7 +146,7 @@ const Home = () => {
                     to="/menu"
                     className="text-amber-200 underline font-medium"
                   >
-                    Add to Cart
+                    View Menu
                   </Link>
                 </div>
               </div>

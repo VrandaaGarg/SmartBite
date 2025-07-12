@@ -210,13 +210,7 @@ const MenuModal = ({ dish, onClose }) => {
                         : "Add Review"}
                     </button>
                   )}
-                  <button
-                    onClick={refreshReviews}
-                    className="text-gray-500 hover:text-red-600 transition-colors p-1"
-                    title="Refresh reviews"
-                  >
-                    <FaSync size={12} />
-                  </button>
+
                   {reviews.length > 5 && (
                     <button
                       onClick={() => setShowAllReviews(!showAllReviews)}
@@ -330,18 +324,11 @@ const MenuModal = ({ dish, onClose }) => {
                       : "Add Review"}
                   </button>
                 )}
-                <button
-                  onClick={refreshReviews}
-                  className="text-gray-500 hover:text-red-600 transition-colors p-1"
-                  title="Refresh reviews"
-                >
-                  <FaSync size={14} />
-                </button>
 
                 {reviews.length > 5 && (
                   <button
                     onClick={() => setShowAllReviews(!showAllReviews)}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+                    className="text-sm text-red-600 mr-7 hover:text-red-700 font-medium transition-colors"
                   >
                     {showAllReviews ? "Show Less" : "View All"}
                   </button>

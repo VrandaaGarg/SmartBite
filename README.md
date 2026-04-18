@@ -1,4 +1,4 @@
-# 🍔 SmartBite – Your Personal Restaurant Ordering Website
+#  SmartBite – Your Personal Restaurant Ordering Website
 
 **SmartBite** is a full-stack restaurant food ordering system tailored for a **single restaurant owner**. From browsing dishes to placing orders, from managing dishes to viewing customers, it handles it all — with an intuitive UI and a smooth, animated experience.
 
